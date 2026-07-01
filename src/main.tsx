@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import './styles/global.css';
+import './i18n';
 import { AppShell } from './ui/AppShell';
 import { StocktakePage } from './features/stocktake/StocktakePage';
 import { StocktakeListPage } from './features/stocktake/StocktakeListPage';

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   useStocktakes,
   useInsertStocktake,
@@ -12,16 +13,17 @@ import * as ui from '../../ui/uikit.css';
 
 const PAGE_SIZE = 20;
 
-const COLUMNS: { key: string; label: string; sort?: ListSortKey; width?: string }[] = [
-  { key: 'number', label: 'Number', sort: 'stocktakeNumber' },
-  { key: 'status', label: 'Status', sort: 'status' },
-  { key: 'description', label: 'Description', sort: 'description' },
-  { key: 'created', label: 'Created', sort: 'createdDatetime' },
-  { key: 'lines', label: 'Lines' },
+const COLUMNS: { key: string; sort?: ListSortKey }[] = [
+  { key: 'number', sort: 'stocktakeNumber' },
+  { key: 'status', sort: 'status' },
+  { key: 'description', sort: 'description' },
+  { key: 'created', sort: 'createdDatetime' },
+  { key: 'lines' },
 ];
 
 export function StocktakeListPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [page, setPage] = useState(0);
   const [sortKey, setSortKey] = useState<ListSortKey>('createdDatetime');
   const [sortDesc, setSortDesc] = useState(true);
@@ -73,13 +75,13 @@ export function StocktakeListPage() {
   return (
     <div className={l.page}>
       <div className={l.bar}>
-        <h1 className={l.title}>Stocktakes</h1>
+        <h1 className={l.title}>{t('stocktakes.title')}</h1>
         <div className={l.spacer} />
         <button className={ui.buttonDanger} disabled={!selectedIds.length || del.isPending} onClick={onDelete}>
-          Delete{selectedIds.length ? ` (${selectedIds.length})` : ''}
+          {selectedIds.length ? t('common.deleteN', { count: selectedIds.length }) : t('common.delete')}
         </button>
         <button className={ui.buttonPrimary} disabled={insert.isPending} onClick={onNew}>
-          + New stocktake
+          {t('stocktakes.new')}
         </button>
       </div>
 
@@ -87,14 +89,14 @@ export function StocktakeListPage() {
         <input
           className={l.filterInput}
           type="search"
-          placeholder="Filter by description…"
+          placeholder={t('stocktakes.filter')}
           value={filterText}
           onChange={(e) => setFilterText(e.target.value)}
-          aria-label="Filter stocktakes"
+          aria-label={t('stocktakes.filter')}
         />
         <span className={l.meta}>
           {query.isFetching ? 'Loading… ' : ''}
-          {total.toLocaleString()} stocktakes
+          {t('stocktakes.count', { count: total })}
         </span>
       </div>
 
@@ -112,7 +114,7 @@ export function StocktakeListPage() {
                     onClick={c.sort ? () => toggleSort(c.sort!) : undefined}
                     aria-sort={active ? (sortDesc ? 'descending' : 'ascending') : undefined}
                   >
-                    {c.label}
+                    {t(`col.${c.key}`)}
                     {active ? (sortDesc ? ' ▼' : ' ▲') : ''}
                   </th>
                 );

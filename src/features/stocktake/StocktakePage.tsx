@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import type { RowSelectionState } from '@tanstack/react-table';
 import { DEFAULT_STOCKTAKE_ID } from '../../gql/client';
 import {
@@ -31,6 +32,7 @@ import * as ui from '../../ui/uikit.css';
 export function StocktakePage() {
   const params = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const stocktakeId = params.stocktakeId ?? DEFAULT_STOCKTAKE_ID;
   const isNarrow = useMediaQuery('(max-width: 900px)');
 
@@ -164,7 +166,7 @@ export function StocktakePage() {
     <div className={p.page}>
       <nav className={p.breadcrumb} aria-label="Breadcrumb">
         <Link to="/inventory/stocktakes" className={p.crumbLink}>
-          Stocktakes
+          {t('stocktakes.title')}
         </Link>
         <span className={p.crumbSep}>/</span>
         <span>#{stocktake?.stocktakeNumber ?? '…'}</span>
@@ -183,36 +185,36 @@ export function StocktakePage() {
             disabled={isFinalised || updateStocktake.isPending}
             onChange={(e) => setOnHold(e.target.checked)}
           />
-          On hold
+          {t('stocktake.onHold')}
         </label>
         <button className={ui.button} disabled={disabled} onClick={() => setAddItemOpen(true)}>
-          + Add item
+          {t('stocktake.addItem')}
         </button>
         <button
           className={ui.buttonDanger}
           disabled={!selectedIds.length || disabled || deleteLines.isPending}
           onClick={onDeleteSelected}
         >
-          Delete{selectedIds.length ? ` (${selectedIds.length})` : ''}
+          {selectedIds.length ? t('common.deleteN', { count: selectedIds.length }) : t('common.delete')}
         </button>
         <button className={ui.buttonPrimary} disabled={isFinalised || updateStocktake.isPending} onClick={confirmFinalised}>
-          Confirm finalised
+          {t('stocktake.confirmFinalised')}
         </button>
         <button className={ui.button} onClick={() => setMoreOpen(true)} disabled={!stocktake}>
-          More
+          {t('stocktake.more')}
         </button>
       </div>
 
       <div className={p.descriptionRow}>
         <label className={p.descLabel} htmlFor="stocktake-description">
-          Description
+          {t('stocktake.description')}
         </label>
         <input
           id="stocktake-description"
           className={p.descInput}
           value={descDraft}
           disabled={disabled}
-          placeholder="Add a description…"
+          placeholder={t('stocktake.descriptionPlaceholder')}
           onChange={(e) => setDescDraft(e.target.value)}
           onBlur={commitDescription}
           onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
@@ -220,17 +222,15 @@ export function StocktakePage() {
       </div>
 
       {disabled && (
-        <div className={p.banner}>
-          {isFinalised ? 'This stocktake is finalised and cannot be edited.' : 'This stocktake is on hold (locked).'}
-        </div>
+        <div className={p.banner}>{isFinalised ? t('stocktake.finalisedBanner') : t('stocktake.onHoldBanner')}</div>
       )}
 
       <div className={p.tabs} role="tablist">
         <button className={p.tab} data-active={tab === 'details'} role="tab" aria-selected={tab === 'details'} onClick={() => setTab('details')}>
-          Details
+          {t('tab.details')}
         </button>
         <button className={p.tab} data-active={tab === 'log'} role="tab" aria-selected={tab === 'log'} onClick={() => setTab('log')}>
-          Log
+          {t('tab.log')}
         </button>
       </div>
 
@@ -240,14 +240,14 @@ export function StocktakePage() {
             <input
               className={p.filterInput}
               type="search"
-              placeholder="Filter items by code or name…"
+              placeholder={t('stocktake.filterItems')}
               value={filterText}
               onChange={(e) => setFilterText(e.target.value)}
-              aria-label="Filter items"
+              aria-label={t('stocktake.filterItems')}
             />
             <span className={p.meta} data-testid="lines-count" data-count={lines.length}>
               {linesQuery.isFetching ? 'Loading… ' : ''}
-              {lines.length.toLocaleString()} of {total.toLocaleString()} lines
+              {t('stocktake.linesCount', { shown: lines.length.toLocaleString(), total: total.toLocaleString() })}
               {committedFilter ? ' (filtered)' : ''}
             </span>
           </div>

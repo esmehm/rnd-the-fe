@@ -1,4 +1,5 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import * as s from './AppShell.css';
 
 // Static context stubs — the prototype runs against a debug_no_access_control backend,
@@ -9,6 +10,7 @@ const LANG = 'English';
 
 export function AppShell() {
   const { pathname } = useLocation();
+  const { t } = useTranslation();
   const inInventory = pathname.startsWith('/inventory');
   return (
     <div className={s.shell}>
@@ -16,17 +18,17 @@ export function AppShell() {
         <div className={s.logo} aria-hidden>
           mS
         </div>
-        <NavLink to="/inventory/stocktakes" className={s.navItem} data-active={inInventory} title="Inventory" aria-label="Inventory">
+        <NavLink to="/inventory/stocktakes" className={s.navItem} data-active={inInventory} title={t('nav.inventory')} aria-label={t('nav.inventory')}>
           📦
         </NavLink>
-        <a className={s.navItem} title="Reports (not in prototype)" aria-label="Reports">
+        <a className={s.navItem} title={t('nav.reports')} aria-label={t('nav.reports')}>
           📊
         </a>
         <div className={s.navSpacer} />
-        <a className={s.navItem} title="Settings (not in prototype)" aria-label="Settings">
+        <a className={s.navItem} title={t('nav.settings')} aria-label={t('nav.settings')}>
           ⚙️
         </a>
-        <a className={s.navItem} title="Help (not in prototype)" aria-label="Help">
+        <a className={s.navItem} title={t('nav.help')} aria-label={t('nav.help')}>
           ❔
         </a>
       </nav>
