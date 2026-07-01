@@ -1,15 +1,68 @@
 import { style, globalStyle } from '@vanilla-extract/css';
 import { vars } from '../../styles/theme.css';
 
+export const wrapper = style({ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, gap: vars.space.sm });
+export const fullscreen = style({
+  position: 'fixed',
+  inset: 0,
+  zIndex: Number(vars.z.modal),
+  background: vars.color.bg,
+  padding: vars.space.lg,
+});
+
+export const toolbar = style({ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: vars.space.sm });
+export const toolbarBtn = style({
+  height: vars.size.control,
+  padding: `0 ${vars.space.md}`,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.sm,
+  background: vars.color.surface,
+  cursor: 'pointer',
+  fontSize: vars.font.sizeSm,
+  color: vars.color.text,
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: vars.space.xs,
+  selectors: {
+    '&[data-hovered]': { background: vars.color.surfaceAlt },
+    '&[data-focus-visible]': { outline: `2px solid ${vars.color.focusRing}` },
+  },
+});
+export const menuCheckItem = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: vars.space.sm,
+  padding: `${vars.space.xs} ${vars.space.md}`,
+  fontSize: vars.font.sizeSm,
+  borderRadius: vars.radius.sm,
+  cursor: 'pointer',
+  outline: 'none',
+  selectors: { '&[data-focused]': { background: vars.color.rowHover } },
+});
+
 export const scrollContainer = style({
   position: 'relative',
   overflow: 'auto',
   height: '100%',
+  flex: 1,
+  minHeight: 0,
   background: vars.color.surface,
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.md,
   // contain layout/paint so scrolling only repaints the viewport window
   contain: 'strict',
+});
+
+export const resizeHandle = style({
+  position: 'absolute',
+  right: 0,
+  top: 0,
+  height: '100%',
+  width: '5px',
+  cursor: 'col-resize',
+  userSelect: 'none',
+  touchAction: 'none',
+  selectors: { '&:hover, &[data-resizing="true"]': { background: vars.color.primary } },
 });
 
 // Header + rows share this grid template so columns line up. Set as a CSS var by
@@ -35,6 +88,7 @@ export const headerRow = style([
 ]);
 
 export const headerCell = style({
+  position: 'relative',
   display: 'flex',
   alignItems: 'center',
   gap: vars.space.xs,
@@ -46,6 +100,7 @@ export const headerCell = style({
   whiteSpace: 'nowrap',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
+  background: vars.color.headerBg,
 });
 
 export const headerSortable = style({
