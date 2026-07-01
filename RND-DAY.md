@@ -54,8 +54,11 @@ A greenfield stocktake screen from an empty folder — **keeps React, removes ev
 else**: Rspack + React 19 + React Compiler, **TanStack Table + Virtual** (headless, plain
 DOM cells, virtualised), **vanilla-extract** (zero-runtime CSS, no emotion), **React Aria**
 (accessible dialog/DatePicker/select), graphql-request + codegen + TanStack Query against
-the **real** backend. Built to strong parity (list view, status workflow, multi-batch edit
-modal, table power features, responsive cards, CSV export, New-stocktake modal, i18next).
+the **real** backend. Built to strong parity (list view, status workflow, multi-batch edit modal with
+Batch/Pricing/Other tabs, More panel + activity Log, table power features, responsive cards, CSV export,
+New-stocktake modal, i18next), then a **visual-parity pass** to align with the old FE + UI standards —
+with a few **conscious divergences** kept (e.g. semantic Confirm/Delete buttons rather than the old FE's
+outlined pills, because colour + text is a stronger, more accessible affordance).
 
 ### The headline (6× CPU throttle = M10 proxy, prod builds, same backend, stocktake #112, 1,506 lines)
 
@@ -69,7 +72,8 @@ modal, table power features, responsive cards, CSV export, New-stocktake modal, 
 
 > _DOM/heap here are the **initial control-arm build**. The feature-complete screen (list + modals +
 > table power features) sits at **~860–894 DOM nodes / ~40 MB heap** — still well under the old FE's
-> 1,363 / 97 MB. Time-to-data-rendered and bundle held across the build-out (progression in the summary)._
+> 1,363 / 97 MB. Time-to-data-rendered held across the build-out **and a later visual-parity pass**
+> (911 → ~905 → ~730 ms across re-measures, CLS 0; progression in the summary) — the win never regressed._
 
 **Interaction latency (INP, 6× CPU, isolated):** open edit modal **104 ms vs 1,144 ms (~11×)**,
 row-select **48–56 ms vs ~304 ms (~6×)**, cell-edit ~40–88 ms (old FE has *no* inline edit — it's
@@ -214,7 +218,9 @@ tagged tests against each prototype and see which pass unchanged. This is the br
 
 **Live demo option:** old FE vs Thin React side by side on the throttled profile — open the edit
 modal on each (1.1 s vs 0.1 s). Then show the `covers`-tagged spec + the results.json that feeds
-the matrix. "Same test, two apps, one table" beats any diagram.
+the matrix. "Same test, two apps, one table" beats any diagram. A **recorded walkthrough** of the
+new-FE stocktake workflow is at [docs/perf/exploratory-stocktake-walkthrough.webm](docs/perf/exploratory-stocktake-walkthrough.webm)
+as a fallback if live throttling is flaky on the day.
 
 ---
 
