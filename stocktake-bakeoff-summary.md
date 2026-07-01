@@ -145,7 +145,7 @@ manufacturer + comment). These are on-demand modals/handlers, so the re-measure 
 | Bake-off vs current app under **6× CPU** (§8) | ✅ (~4× faster, ~5.6× smaller) |
 | §8 metrics: LCP · bundle-per-route | ✅ |
 | §8 metric: **rows-before-jank** | 🟡 all 1,506 virtualised w/ no jank; didn't push to 10k/100k |
-| §8 metric: **INP** (cell-edit, scroll) | ❌ not measured |
+| §8 metric: **INP** (cell-edit, scroll) | 🟡 Thin React measured (6× CPU): INP ≈ **296 ms** (modal mount), cell-edit **88 ms**, scroll smooth (13 ms worst frame). Old-FE head-to-head pending. |
 | §8: **slow network** throttle | ❌ CPU-only |
 | §8: **Solid arm** (3rd implementation) | ❌ not built (evidence-driven optional) |
 | Stack: vanilla-extract · React Aria · TanStack Table/Virtual · Rspack · React 19+Compiler · codegen | ✅ |
@@ -161,8 +161,9 @@ and the **Solid arm**.
 
 ## Next steps (priority order)
 
-1. **INP** probe (event-timing + scripted cell-edit/scroll) on both apps — the one named metric still missing.
+1. **INP** — Thin React done (runner: `.claude/skills/perf-measure/run-inp.playwright.js`); left: the
+   **old-FE head-to-head** (drive its authed screen with the same runner).
 2. **CI perf-budget gate** — break the build on bundle-per-route + INP/network-quiet regressions (§7's
-   "design pattern that stops perf regressing").
+   "design pattern that stops perf regressing"). The load + INP runners already emit the numbers.
 3. **Solid arm** — does dropping the VDOM buy more on top of the ~4×?
 4. Lower value: full grid keyboard nav (WCAG), i18n RTL + full extraction, route code-splitting, Slow-4G run.

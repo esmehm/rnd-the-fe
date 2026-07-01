@@ -259,9 +259,30 @@ Maintainability notes: reused the one `useSaveStocktakeLines` upsert path (Other
 `SaveLineDraft`); CSV is a pure function (no dep); the New-stocktake estimate reuses codegen'd queries. All
 new strings go through i18next where converted.
 
+## INP + scroll (6× CPU) — the interaction half of the M10 story
+
+Measured real interactions under 6× CPU via the Event Timing API (only *trusted* input produces
+`interactionId` entries, so driven with real Playwright input, not `dispatchEvent`), with a discarded
+warm-up (the first post-load interaction is inflated — a 1,328 ms artifact without it). Runner:
+`.claude/skills/perf-measure/run-inp.playwright.js`.
+
+| Interaction | INP (ms, 6× CPU) |
+|---|---|
+| **Cell-edit (type counted)** | **88** ✅ (isolated cell re-render) |
+| Sort (header click) | 184–256 |
+| Row-select (checkbox) | 200 |
+| **Open edit modal** | **296** (worst — React Aria dialog mount) |
+| **Scroll** (wheel) | worst frame **13 ms**, 0 long (>50 ms) frames — smooth |
+
+**Thin React INP ≈ 296 ms** under 6× CPU, all interactions < 300 ms; the core counting interaction
+(cell-edit) is **88 ms**. This is the metric the RnD doc flagged as *"Thin React's ceiling"* (VDOM
+reconciliation) — and it's comfortably acceptable, i.e. **evidence that the renderer isn't the
+bottleneck for these interactions**, so the Solid arm stays an optional bet rather than a necessity.
+Not yet done: the **old-FE INP** for a head-to-head (needs driving its authed screen).
+
 ## Still to do
 
-- **INP** on cell-edit + scroll (interaction latency) — the other half of the M10 story, both apps.
+- **Old-FE INP** for the head-to-head (Thin React INP is measured; the current app's isn't yet).
 - **Full i18n** string extraction (i18next pattern established for key strings) + RTL via CSS logical props.
 - Full arrow-key roving-tabindex grid keyboard nav (ARIA roles + resize/sort focus are in; cell-to-cell nav is the remaining WCAG item).
 - Lower-value view polish: **Group by item**, **column reorder**, **persisted table state**, structured list **Filters**, **Print/report**.

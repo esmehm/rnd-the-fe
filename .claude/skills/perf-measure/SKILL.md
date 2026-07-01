@@ -23,6 +23,8 @@ set and results format are fixed (see `append-row.mjs` COLUMNS).
   `page.context().newCDPSession(page)` → `Emulation.setCPUThrottlingRate {rate:6}`,
   `Network.emulateNetworkConditions`, `page.addInitScript` (document-start probe), CDP HeapProfiler.
   A ready-to-run function lives in `run-throttled.playwright.js` — pass it to `run_code_unsafe`.
+  For **INP + scroll-jank** (interaction latency under throttle), use `run-inp.playwright.js` — it drives
+  real clicks/keystrokes (trusted events → Event Timing) and reads INP per interaction.
   **Two gotchas** (baked into that runner): `addInitScript` **accumulates** across calls (+ a
   `if(window.__perf)return` guard makes new probes bail) → **run on a fresh page**; and a
   MutationObserver "ready" stamp was unreliable → stamp `readyAt` with a **requestAnimationFrame poll**.
