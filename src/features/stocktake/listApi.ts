@@ -4,6 +4,8 @@ import type {
   StocktakeRowFragment,
   StocktakeSortFieldInput,
   UpdateStocktakeInput,
+  InsertStocktakeInput,
+  StockLineFilterInput,
 } from '../../gql/generated';
 
 export type StocktakeListRow = StocktakeRowFragment;
@@ -44,13 +46,32 @@ export function useStocktakes(args: StocktakesArgs) {
 export function useInsertStocktake() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async (input: Omit<InsertStocktakeInput, 'id'>) => {
       const id = crypto.randomUUID();
-      const res = await sdk.InsertStocktake({ storeId: STORE_ID, input: { id, createBlankStocktake: true } });
+      const res = await sdk.InsertStocktake({ storeId: STORE_ID, input: { id, ...input } });
       if (res.insertStocktake.__typename !== 'StocktakeNode') throw new Error('Could not create stocktake');
       return res.insertStocktake;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['stocktakes'] }),
+  });
+}
+
+export function useMasterLists(enabled: boolean) {
+  return useQuery({
+    queryKey: ['masterLists'],
+    enabled,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => (await sdk.MasterLists({ storeId: STORE_ID })).masterLists.nodes,
+  });
+}
+
+// Live line estimate for the New-stocktake modal — counts stock lines (a full
+// stocktake creates one line per stock line, so this matches the created count).
+export function useStockLineCount(filter: StockLineFilterInput, enabled: boolean) {
+  return useQuery({
+    queryKey: ['stockLineCount', filter],
+    enabled,
+    queryFn: async () => (await sdk.StockLineCount({ storeId: STORE_ID, filter })).stockLines.totalCount,
   });
 }
 

@@ -1,12 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import {
-  useStocktakes,
-  useInsertStocktake,
-  useDeleteStocktakes,
-  type ListSortKey,
-} from './listApi';
+import { useStocktakes, useDeleteStocktakes, type ListSortKey } from './listApi';
+import { NewStocktakeModal } from './NewStocktakeModal';
 import { formatDate } from './format';
 import { toCsv, downloadCsv } from './csv';
 import * as l from './StocktakeListPage.css';
@@ -32,6 +28,7 @@ export function StocktakeListPage() {
   const [committedFilter, setCommittedFilter] = useState('');
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [toast, setToast] = useState<string | null>(null);
+  const [newOpen, setNewOpen] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -48,7 +45,6 @@ export function StocktakeListPage() {
   }, [toast]);
 
   const query = useStocktakes({ first: PAGE_SIZE, offset: page * PAGE_SIZE, sortKey, sortDesc, filter: committedFilter });
-  const insert = useInsertStocktake();
   const del = useDeleteStocktakes();
 
   const rows = query.data?.nodes ?? [];
@@ -63,12 +59,6 @@ export function StocktakeListPage() {
       setSortDesc(false);
     }
   };
-
-  const onNew = () =>
-    insert.mutate(undefined, {
-      onSuccess: (st) => navigate(`/inventory/stocktakes/${st.id}`),
-      onError: (e) => setToast((e as Error).message),
-    });
 
   const onDelete = () =>
     del.mutate(selectedIds, { onSuccess: () => setSelected({}), onError: (e) => setToast((e as Error).message) });
@@ -96,7 +86,7 @@ export function StocktakeListPage() {
         >
           {t('stocktakes.exportCsv')}
         </button>
-        <button className={ui.buttonPrimary} disabled={insert.isPending} onClick={onNew}>
+        <button className={ui.buttonPrimary} onClick={() => setNewOpen(true)}>
           {t('stocktakes.new')}
         </button>
       </div>
@@ -209,6 +199,16 @@ export function StocktakeListPage() {
         <div className={ui.button} role="alert" style={{ position: 'fixed', bottom: 48, left: '50%', transform: 'translateX(-50%)' }}>
           {toast}
         </div>
+      )}
+
+      {newOpen && (
+        <NewStocktakeModal
+          onClose={() => setNewOpen(false)}
+          onCreated={(id) => {
+            setNewOpen(false);
+            navigate(`/inventory/stocktakes/${id}`);
+          }}
+        />
       )}
     </div>
   );

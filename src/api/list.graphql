@@ -93,6 +93,31 @@ query ActivityLogs($storeId: String!, $recordId: String!) {
   }
 }
 
+query StockLineCount($storeId: String!, $filter: StockLineFilterInput) {
+  stockLines(storeId: $storeId, filter: $filter, page: { first: 1 }) {
+    ... on StockLineConnector {
+      __typename
+      totalCount
+    }
+  }
+}
+
+query MasterLists($storeId: String!) {
+  masterLists(storeId: $storeId, filter: { existsForStoreId: { equalTo: $storeId } }, page: { first: 500 }) {
+    ... on MasterListConnector {
+      __typename
+      totalCount
+      nodes {
+        __typename
+        id
+        name
+        code
+        linesCount
+      }
+    }
+  }
+}
+
 query Items($storeId: String!, $filter: ItemFilterInput, $page: PaginationInput) {
   items(storeId: $storeId, filter: $filter, page: $page) {
     ... on ItemConnector {

@@ -12223,6 +12223,21 @@ export type ActivityLogsQueryVariables = Exact<{
 
 export type ActivityLogsQuery = { __typename?: 'Queries', activityLogs: { __typename: 'ActivityLogConnector', totalCount: number, nodes: Array<{ __typename: 'ActivityLogNode', id: string, type: ActivityLogNodeType, datetime: string, to: string | null, from: string | null, user: { __typename: 'UserNode', username: string } | null }> } };
 
+export type StockLineCountQueryVariables = Exact<{
+  storeId: Scalars['String']['input'];
+  filter?: InputMaybe<StockLineFilterInput>;
+}>;
+
+
+export type StockLineCountQuery = { __typename?: 'Queries', stockLines: { __typename: 'StockLineConnector', totalCount: number } };
+
+export type MasterListsQueryVariables = Exact<{
+  storeId: Scalars['String']['input'];
+}>;
+
+
+export type MasterListsQuery = { __typename?: 'Queries', masterLists: { __typename: 'MasterListConnector', totalCount: number, nodes: Array<{ __typename: 'MasterListNode', id: string, name: string, code: string, linesCount: number | null }> } };
+
 export type ItemsQueryVariables = Exact<{
   storeId: Scalars['String']['input'];
   filter?: InputMaybe<ItemFilterInput>;
@@ -12425,6 +12440,37 @@ export const ActivityLogsDocument = gql`
   }
 }
     `;
+export const StockLineCountDocument = gql`
+    query StockLineCount($storeId: String!, $filter: StockLineFilterInput) {
+  stockLines(storeId: $storeId, filter: $filter, page: {first: 1}) {
+    ... on StockLineConnector {
+      __typename
+      totalCount
+    }
+  }
+}
+    `;
+export const MasterListsDocument = gql`
+    query MasterLists($storeId: String!) {
+  masterLists(
+    storeId: $storeId
+    filter: {existsForStoreId: {equalTo: $storeId}}
+    page: {first: 500}
+  ) {
+    ... on MasterListConnector {
+      __typename
+      totalCount
+      nodes {
+        __typename
+        id
+        name
+        code
+        linesCount
+      }
+    }
+  }
+}
+    `;
 export const ItemsDocument = gql`
     query Items($storeId: String!, $filter: ItemFilterInput, $page: PaginationInput) {
   items(storeId: $storeId, filter: $filter, page: $page) {
@@ -12573,6 +12619,12 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     ActivityLogs(variables: ActivityLogsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<ActivityLogsQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<ActivityLogsQuery>({ document: ActivityLogsDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'ActivityLogs', 'query', variables);
+    },
+    StockLineCount(variables: StockLineCountQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<StockLineCountQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<StockLineCountQuery>({ document: StockLineCountDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'StockLineCount', 'query', variables);
+    },
+    MasterLists(variables: MasterListsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<MasterListsQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<MasterListsQuery>({ document: MasterListsDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'MasterLists', 'query', variables);
     },
     Items(variables: ItemsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<ItemsQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<ItemsQuery>({ document: ItemsDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'Items', 'query', variables);
