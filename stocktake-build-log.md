@@ -199,7 +199,8 @@ Added to close the gap with the old FE: **app shell** (nav + footer), **stocktak
 description, Add-item search, On-hold/Confirm-finalised status workflow), **multi-batch edit modal**
 (Batch/Pricing/Other tabs, Add batch, OK & next), **More panel + Log tab**, **table power features**
 (column show/hide, resize, freeze/pin, fullscreen, ARIA grid roles), and a **responsive card view**
-(virtualised, 48px touch targets, <900px).
+(virtualised, 48px touch targets, <900px — later narrowed to `<600px` phones-only; see the visual-parity
+pass below).
 
 Re-measured the detail screen (6× CPU, prod, 1,506 lines) to guard the win:
 

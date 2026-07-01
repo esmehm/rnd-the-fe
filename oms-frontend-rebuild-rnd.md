@@ -237,6 +237,7 @@ CSV export, and the full/filtered/blank New-stocktake modal.
 - Chronological build log + gotchas: [stocktake-build-log.md](stocktake-build-log.md)
 - Raw measured rows: [docs/perf/frontend-runs.html](docs/perf/frontend-runs.html)
 
-**Gaps vs this brief still open:** (1) **INP** (named metric — cell-edit/scroll) not yet measured; (2) **CI
-perf-budget gate** (§7's "stops perf regressing" pattern); (3) the **Solid arm** (§8's evidence-driven optional
-third implementation). Lower-value: full grid keyboard nav, RTL, code-splitting, Command-K.
+**Gaps vs this brief still open:** (1) **CI perf-budget gate** (§7's "stops perf regressing" pattern); (2) the
+**Solid arm** (§8's evidence-driven optional third implementation). **INP is now measured** — full old-FE
+head-to-head under 6× CPU, 6–11× snappier on the heavy interactions (open-modal 104 ms vs 1,144 ms), never
+worse. Lower-value: full grid keyboard nav, RTL, code-splitting, Command-K.

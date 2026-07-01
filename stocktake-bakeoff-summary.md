@@ -72,12 +72,15 @@ apples-to-apples on the dataset.
 - **14 vs 3 GraphQL calls**: the old FE's cold load is chattier (app-shell/bootstrap queries), which
   *flatters* the end-to-end time. But FCP, bundle, DOM, heap and LCP each favour Thin React by 2.7–8×
   independently of network chatter.
-- **Load only.** INP (cell-edit / scroll interaction latency) — the other half of the M10 story — is
-  **not yet measured**.
+- **This table is load-only.** INP (interaction latency) is measured separately and is a head-to-head
+  win — 6–11× on the heavy interactions (open-modal 104 ms vs 1,144 ms, row-select 48–56 vs ~304 ms) in
+  an isolated 6× context (see the coverage table + build log).
 - Local backend, **no network throttle** (transfer sizes are gzipped and comparable; adding Slow 4G
   would widen the bundle gap, not narrow it).
-- Thin React is a **prototype**: single-line edit modal (not the multi-batch sub-grid), and
-  column-resize / frozen columns / full grid keyboard-nav aren't built yet (the known MRT-parity work).
+- Thin React is a **prototype**, but the earlier "single-line modal / no resize / no frozen columns"
+  caveat is now out of date — the multi-batch edit modal, column resize, freeze/pin, show/hide and
+  fullscreen were built after the initial bake-off (see "Feature parity build-out"). Genuinely still
+  partial: full cell-to-cell grid keyboard-nav, i18n RTL, and route code-splitting.
 
 ## How to reproduce
 
@@ -117,7 +120,8 @@ the **stocktakes list view** (paginated, New/delete, filter, row→detail), **de
 workflow), a **multi-batch edit modal** (Batch/Pricing/Other tabs, Add batch, OK & next), a
 **More panel + Log tab** (activity log), **table power features** (column show/hide, resize,
 freeze/pin, fullscreen, ARIA grid roles), a **responsive card view** (virtualised, 48px touch
-targets, <900px), and **i18next** (English bundle; key strings converted).
+targets, phones `<600px`; tablets keep the table per the UI standards), and **i18next** (English bundle;
+key strings converted).
 
 **Re-measured to guard the win** (6× CPU, prod, 1,506 lines, commit `14b9020`):
 
@@ -135,6 +139,13 @@ Then the three biggest *functional* gaps were closed too — **CSV export**, the
 New-stocktake modal** (live stock-line estimate), and the **edit-modal "Other" tab** (per-batch
 manufacturer + comment). These are on-demand modals/handlers, so the re-measure was **912 ms data-render,
 861 DOM, 279 KB gzip (+19)** — no change to the table load path. Win intact.
+
+A later **visual-parity pass** (align to the old FE + [UI standards](https://msupply-foundation.github.io/ui-standards/):
+right-aligned numeric headers, charcoal item name, grey header band, expiry amber/red, 48px rows, cards
+`<600px` only) also fixed a blank tablet/phone card view — the React Compiler was over-memoising the
+TanStack Virtual list; `'use no memo'` on the phone-only cards restores it while the desktop table keeps
+full compiler optimisation. Re-measure (commit `11bc72d`): **~730 ms data-render, 894 DOM, CLS 0** — table
+load path unchanged. Win intact.
 
 ## Coverage vs the original brief
 
@@ -161,9 +172,10 @@ and the **Solid arm**.
 
 ## Next steps (priority order)
 
-1. **INP** — Thin React done (runner: `.claude/skills/perf-measure/run-inp.playwright.js`); left: the
-   **old-FE head-to-head** (drive its authed screen with the same runner).
-2. **CI perf-budget gate** — break the build on bundle-per-route + INP/network-quiet regressions (§7's
+_INP is done — full old-FE head-to-head measured (runner: `.claude/skills/perf-measure/run-inp.playwright.js`),
+6–11× on the heavy interactions._
+
+1. **CI perf-budget gate** — break the build on bundle-per-route + INP/network-quiet regressions (§7's
    "design pattern that stops perf regressing"). The load + INP runners already emit the numbers.
-3. **Solid arm** — does dropping the VDOM buy more on top of the ~4×?
-4. Lower value: full grid keyboard nav (WCAG), i18n RTL + full extraction, route code-splitting, Slow-4G run.
+2. **Solid arm** — does dropping the VDOM buy more on top of the ~4×?
+3. Lower value: full grid keyboard nav (WCAG), i18n RTL + full extraction, route code-splitting, Slow-4G run.
