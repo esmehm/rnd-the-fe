@@ -37,6 +37,11 @@ fragment StocktakeLineRow on StocktakeLineNode {
     reason
     type
   }
+  manufacturer(storeId: $storeId) {
+    __typename
+    id
+    name
+  }
 }
 
 query Stocktake($stocktakeId: String!, $storeId: String!) {

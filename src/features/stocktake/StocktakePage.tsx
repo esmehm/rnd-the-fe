@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import type { RowSelectionState } from '@tanstack/react-table';
 import { DEFAULT_STOCKTAKE_ID } from '../../gql/client';
 import {
@@ -11,8 +11,10 @@ import {
   type SortKey,
   type StocktakeLine,
 } from './api';
+import { useUpdateStocktake } from './listApi';
 import { StocktakeTable } from './StocktakeTable';
 import { EditLineModal } from './EditLineModal';
+import { AddItemModal } from './AddItemModal';
 import * as p from './StocktakePage.css';
 import * as ui from '../../ui/uikit.css';
 
@@ -28,6 +30,8 @@ export function StocktakePage() {
   const [sortDesc, setSortDesc] = useState(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [editLine, setEditLine] = useState<StocktakeLine | null>(null);
+  const [addItemOpen, setAddItemOpen] = useState(false);
+  const [descDraft, setDescDraft] = useState('');
   const [toast, setToast] = useState<string | null>(null);
   // A counted value that created a variance but hasn't been saved yet because the
   // backend needs a reason. Held here so choosing a reason commits both together.
@@ -54,9 +58,26 @@ export function StocktakePage() {
   const reasonsQuery = useReasonOptions();
   const updateLine = useUpdateStocktakeLine(stocktakeId);
   const deleteLines = useDeleteStocktakeLines(stocktakeId);
+  const updateStocktake = useUpdateStocktake(stocktakeId);
 
   const stocktake = stocktakeQuery.data;
-  const disabled = !!stocktake && (stocktake.status === 'FINALISED' || stocktake.isLocked);
+  const isFinalised = stocktake?.status === 'FINALISED';
+  const disabled = !!stocktake && (isFinalised || stocktake.isLocked);
+
+  // Keep the editable description in sync with the server value when not focused.
+  useEffect(() => {
+    setDescDraft(stocktake?.description ?? '');
+  }, [stocktake?.description]);
+
+  const commitDescription = () => {
+    if (!stocktake || descDraft === (stocktake.description ?? '')) return;
+    updateStocktake.mutate({ description: descDraft }, { onError: flashError });
+  };
+  const setOnHold = (isLocked: boolean) => updateStocktake.mutate({ isLocked }, { onError: flashError });
+  const confirmFinalised = () => {
+    if (!confirm('Finalise this stocktake? It will become read-only.')) return;
+    updateStocktake.mutate({ status: 'FINALISED' }, { onError: flashError });
+  };
 
   const onToggleSort = (key: SortKey) => {
     if (key === sortKey) setSortDesc((d) => !d);
@@ -117,13 +138,32 @@ export function StocktakePage() {
 
   return (
     <div className={p.page}>
+      <nav className={p.breadcrumb} aria-label="Breadcrumb">
+        <Link to="/inventory/stocktakes" className={p.crumbLink}>
+          Stocktakes
+        </Link>
+        <span className={p.crumbSep}>/</span>
+        <span>#{stocktake?.stocktakeNumber ?? '…'}</span>
+      </nav>
+
       <div className={p.headerBar}>
         <h1 className={p.title}>
           Stocktake #{stocktake?.stocktakeNumber ?? '…'}
           {stocktake && <span className={p.statusBadge}>{stocktake.status}</span>}
         </h1>
-        <span className={p.meta}>{stocktake?.description}</span>
         <div className={p.spacer} />
+        <label className={p.onHold} title="Lock this stocktake from edits">
+          <input
+            type="checkbox"
+            checked={!!stocktake?.isLocked}
+            disabled={isFinalised || updateStocktake.isPending}
+            onChange={(e) => setOnHold(e.target.checked)}
+          />
+          On hold
+        </label>
+        <button className={ui.button} disabled={disabled} onClick={() => setAddItemOpen(true)}>
+          + Add item
+        </button>
         <button
           className={ui.buttonDanger}
           disabled={!selectedIds.length || disabled || deleteLines.isPending}
@@ -131,10 +171,31 @@ export function StocktakePage() {
         >
           Delete{selectedIds.length ? ` (${selectedIds.length})` : ''}
         </button>
+        <button className={ui.buttonPrimary} disabled={isFinalised || updateStocktake.isPending} onClick={confirmFinalised}>
+          Confirm finalised
+        </button>
+      </div>
+
+      <div className={p.descriptionRow}>
+        <label className={p.descLabel} htmlFor="stocktake-description">
+          Description
+        </label>
+        <input
+          id="stocktake-description"
+          className={p.descInput}
+          value={descDraft}
+          disabled={disabled}
+          placeholder="Add a description…"
+          onChange={(e) => setDescDraft(e.target.value)}
+          onBlur={commitDescription}
+          onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
+        />
       </div>
 
       {disabled && (
-        <div className={p.banner}>This stocktake is finalised or locked and cannot be edited.</div>
+        <div className={p.banner}>
+          {isFinalised ? 'This stocktake is finalised and cannot be edited.' : 'This stocktake is on hold (locked).'}
+        </div>
       )}
 
       <div className={p.toolbar}>
@@ -178,6 +239,8 @@ export function StocktakePage() {
           {toast}
         </div>
       )}
+
+      {addItemOpen && <AddItemModal stocktakeId={stocktakeId} onClose={() => setAddItemOpen(false)} />}
 
       {editLine && (
         <EditLineModal

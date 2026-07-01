@@ -1,0 +1,106 @@
+# Operations for the stocktakes LIST view + status workflow + add-item search.
+
+fragment StocktakeRow on StocktakeNode {
+  __typename
+  id
+  stocktakeNumber
+  status
+  description
+  comment
+  createdDatetime
+  finalisedDatetime
+  isLocked
+  lines {
+    __typename
+    totalCount
+  }
+}
+
+query Stocktakes(
+  $storeId: String!
+  $page: PaginationInput
+  $sort: [StocktakeSortInput!]
+  $filter: StocktakeFilterInput
+) {
+  stocktakes(storeId: $storeId, page: $page, sort: $sort, filter: $filter) {
+    ... on StocktakeConnector {
+      __typename
+      totalCount
+      nodes {
+        ...StocktakeRow
+      }
+    }
+  }
+}
+
+mutation InsertStocktake($storeId: String!, $input: InsertStocktakeInput!) {
+  insertStocktake(storeId: $storeId, input: $input) {
+    __typename
+    ... on StocktakeNode {
+      id
+      stocktakeNumber
+    }
+  }
+}
+
+mutation DeleteStocktake($storeId: String!, $input: DeleteStocktakeInput!) {
+  deleteStocktake(storeId: $storeId, input: $input) {
+    __typename
+    ... on DeleteResponse {
+      id
+    }
+  }
+}
+
+mutation UpdateStocktake($storeId: String!, $input: UpdateStocktakeInput!) {
+  updateStocktake(storeId: $storeId, input: $input) {
+    __typename
+    ... on StocktakeNode {
+      id
+      status
+      isLocked
+      description
+      comment
+    }
+    ... on UpdateStocktakeError {
+      __typename
+      error {
+        __typename
+        description
+      }
+    }
+  }
+}
+
+query Items($storeId: String!, $filter: ItemFilterInput, $page: PaginationInput) {
+  items(storeId: $storeId, filter: $filter, page: $page) {
+    ... on ItemConnector {
+      __typename
+      totalCount
+      nodes {
+        __typename
+        id
+        code
+        name
+        unitName
+        defaultPackSize
+      }
+    }
+  }
+}
+
+mutation InsertStocktakeLine($storeId: String!, $input: InsertStocktakeLineInput!) {
+  insertStocktakeLine(storeId: $storeId, input: $input) {
+    __typename
+    ... on StocktakeLineNode {
+      ...StocktakeLineRow
+    }
+    ... on InsertStocktakeLineError {
+      __typename
+      error {
+        __typename
+        description
+      }
+    }
+  }
+}

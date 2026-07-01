@@ -182,6 +182,14 @@ export const columns: ColumnDef<StocktakeLine>[] = [
     ),
   },
   {
+    id: 'manufacturer',
+    header: 'Manufacturer',
+    accessorFn: (l) => l.manufacturer?.name ?? '',
+    meta: { width: 150 },
+    enableSorting: false,
+    cell: ({ getValue }) => <div className={s.cellTruncate}>{getValue<string>()}</div>,
+  },
+  {
     id: 'comment',
     header: 'Comment',
     accessorFn: (l) => l.comment ?? '',

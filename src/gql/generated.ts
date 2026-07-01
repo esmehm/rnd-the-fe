@@ -12179,7 +12179,60 @@ export type WarningNode = {
   warningText: Scalars['String']['output'];
 };
 
-export type StocktakeLineRowFragment = { __typename: 'StocktakeLineNode', id: string, stocktakeId: string, itemId: string, itemName: string, batch: string | null, expiryDate: string | null, manufactureDate: string | null, packSize: number | null, snapshotNumberOfPacks: number, countedNumberOfPacks: number | null, comment: string | null, costPricePerPack: number | null, sellPricePerPack: number | null, volumePerPack: number, item: { __typename: 'ItemNode', id: string, code: string, name: string, unitName: string | null }, location: { __typename: 'LocationNode', id: string, code: string, name: string } | null, reasonOption: { __typename: 'ReasonOptionNode', id: string, reason: string, type: ReasonOptionNodeType } | null };
+export type StocktakeRowFragment = { __typename: 'StocktakeNode', id: string, stocktakeNumber: number, status: StocktakeNodeStatus, description: string | null, comment: string | null, createdDatetime: string, finalisedDatetime: string | null, isLocked: boolean, lines: { __typename: 'StocktakeLineConnector', totalCount: number } };
+
+export type StocktakesQueryVariables = Exact<{
+  storeId: Scalars['String']['input'];
+  page?: InputMaybe<PaginationInput>;
+  sort?: InputMaybe<Array<StocktakeSortInput> | StocktakeSortInput>;
+  filter?: InputMaybe<StocktakeFilterInput>;
+}>;
+
+
+export type StocktakesQuery = { __typename?: 'Queries', stocktakes: { __typename: 'StocktakeConnector', totalCount: number, nodes: Array<{ __typename: 'StocktakeNode', id: string, stocktakeNumber: number, status: StocktakeNodeStatus, description: string | null, comment: string | null, createdDatetime: string, finalisedDatetime: string | null, isLocked: boolean, lines: { __typename: 'StocktakeLineConnector', totalCount: number } }> } };
+
+export type InsertStocktakeMutationVariables = Exact<{
+  storeId: Scalars['String']['input'];
+  input: InsertStocktakeInput;
+}>;
+
+
+export type InsertStocktakeMutation = { __typename?: 'Mutations', insertStocktake: { __typename: 'StocktakeNode', id: string, stocktakeNumber: number } };
+
+export type DeleteStocktakeMutationVariables = Exact<{
+  storeId: Scalars['String']['input'];
+  input: DeleteStocktakeInput;
+}>;
+
+
+export type DeleteStocktakeMutation = { __typename?: 'Mutations', deleteStocktake: { __typename: 'DeleteResponse', id: string } | { __typename: 'DeleteStocktakeError' } };
+
+export type UpdateStocktakeMutationVariables = Exact<{
+  storeId: Scalars['String']['input'];
+  input: UpdateStocktakeInput;
+}>;
+
+
+export type UpdateStocktakeMutation = { __typename?: 'Mutations', updateStocktake: { __typename: 'StocktakeNode', id: string, status: StocktakeNodeStatus, isLocked: boolean, description: string | null, comment: string | null } | { __typename: 'UpdateStocktakeError', error: { __typename: 'CannotEditStocktake', description: string } | { __typename: 'SnapshotCountCurrentCountMismatch', description: string } | { __typename: 'StockLinesReducedBelowZero', description: string } | { __typename: 'StocktakeIsLocked', description: string } } };
+
+export type ItemsQueryVariables = Exact<{
+  storeId: Scalars['String']['input'];
+  filter?: InputMaybe<ItemFilterInput>;
+  page?: InputMaybe<PaginationInput>;
+}>;
+
+
+export type ItemsQuery = { __typename?: 'Queries', items: { __typename: 'ItemConnector', totalCount: number, nodes: Array<{ __typename: 'ItemNode', id: string, code: string, name: string, unitName: string | null, defaultPackSize: number }> } };
+
+export type InsertStocktakeLineMutationVariables = Exact<{
+  storeId: Scalars['String']['input'];
+  input: InsertStocktakeLineInput;
+}>;
+
+
+export type InsertStocktakeLineMutation = { __typename?: 'Mutations', insertStocktakeLine: { __typename: 'InsertStocktakeLineError', error: { __typename: 'AdjustmentReasonNotProvided', description: string } | { __typename: 'AdjustmentReasonNotValid', description: string } | { __typename: 'CannotEditStocktake', description: string } | { __typename: 'StockLineReducedBelowZero', description: string } } | { __typename: 'StocktakeLineNode', id: string, stocktakeId: string, itemId: string, itemName: string, batch: string | null, expiryDate: string | null, manufactureDate: string | null, packSize: number | null, snapshotNumberOfPacks: number, countedNumberOfPacks: number | null, comment: string | null, costPricePerPack: number | null, sellPricePerPack: number | null, volumePerPack: number, item: { __typename: 'ItemNode', id: string, code: string, name: string, unitName: string | null }, location: { __typename: 'LocationNode', id: string, code: string, name: string } | null, reasonOption: { __typename: 'ReasonOptionNode', id: string, reason: string, type: ReasonOptionNodeType } | null, manufacturer: { __typename: 'NameNode', id: string, name: string } | null } };
+
+export type StocktakeLineRowFragment = { __typename: 'StocktakeLineNode', id: string, stocktakeId: string, itemId: string, itemName: string, batch: string | null, expiryDate: string | null, manufactureDate: string | null, packSize: number | null, snapshotNumberOfPacks: number, countedNumberOfPacks: number | null, comment: string | null, costPricePerPack: number | null, sellPricePerPack: number | null, volumePerPack: number, item: { __typename: 'ItemNode', id: string, code: string, name: string, unitName: string | null }, location: { __typename: 'LocationNode', id: string, code: string, name: string } | null, reasonOption: { __typename: 'ReasonOptionNode', id: string, reason: string, type: ReasonOptionNodeType } | null, manufacturer: { __typename: 'NameNode', id: string, name: string } | null };
 
 export type StocktakeQueryVariables = Exact<{
   stocktakeId: Scalars['String']['input'];
@@ -12198,7 +12251,7 @@ export type StocktakeLinesQueryVariables = Exact<{
 }>;
 
 
-export type StocktakeLinesQuery = { __typename?: 'Queries', stocktakeLines: { __typename: 'StocktakeLineConnector', totalCount: number, nodes: Array<{ __typename: 'StocktakeLineNode', id: string, stocktakeId: string, itemId: string, itemName: string, batch: string | null, expiryDate: string | null, manufactureDate: string | null, packSize: number | null, snapshotNumberOfPacks: number, countedNumberOfPacks: number | null, comment: string | null, costPricePerPack: number | null, sellPricePerPack: number | null, volumePerPack: number, item: { __typename: 'ItemNode', id: string, code: string, name: string, unitName: string | null }, location: { __typename: 'LocationNode', id: string, code: string, name: string } | null, reasonOption: { __typename: 'ReasonOptionNode', id: string, reason: string, type: ReasonOptionNodeType } | null }> } };
+export type StocktakeLinesQuery = { __typename?: 'Queries', stocktakeLines: { __typename: 'StocktakeLineConnector', totalCount: number, nodes: Array<{ __typename: 'StocktakeLineNode', id: string, stocktakeId: string, itemId: string, itemName: string, batch: string | null, expiryDate: string | null, manufactureDate: string | null, packSize: number | null, snapshotNumberOfPacks: number, countedNumberOfPacks: number | null, comment: string | null, costPricePerPack: number | null, sellPricePerPack: number | null, volumePerPack: number, item: { __typename: 'ItemNode', id: string, code: string, name: string, unitName: string | null }, location: { __typename: 'LocationNode', id: string, code: string, name: string } | null, reasonOption: { __typename: 'ReasonOptionNode', id: string, reason: string, type: ReasonOptionNodeType } | null, manufacturer: { __typename: 'NameNode', id: string, name: string } | null }> } };
 
 export type UpdateStocktakeLineMutationVariables = Exact<{
   storeId: Scalars['String']['input'];
@@ -12206,7 +12259,7 @@ export type UpdateStocktakeLineMutationVariables = Exact<{
 }>;
 
 
-export type UpdateStocktakeLineMutation = { __typename?: 'Mutations', updateStocktakeLine: { __typename: 'StocktakeLineNode', id: string, stocktakeId: string, itemId: string, itemName: string, batch: string | null, expiryDate: string | null, manufactureDate: string | null, packSize: number | null, snapshotNumberOfPacks: number, countedNumberOfPacks: number | null, comment: string | null, costPricePerPack: number | null, sellPricePerPack: number | null, volumePerPack: number, item: { __typename: 'ItemNode', id: string, code: string, name: string, unitName: string | null }, location: { __typename: 'LocationNode', id: string, code: string, name: string } | null, reasonOption: { __typename: 'ReasonOptionNode', id: string, reason: string, type: ReasonOptionNodeType } | null } | { __typename: 'UpdateStocktakeLineError', error: { __typename: 'AdjustmentReasonNotProvided', description: string } | { __typename: 'AdjustmentReasonNotValid', description: string } | { __typename: 'CannotEditStocktake', description: string } | { __typename: 'SnapshotCountCurrentCountMismatchLine', description: string } | { __typename: 'StockLineReducedBelowZero', description: string } } };
+export type UpdateStocktakeLineMutation = { __typename?: 'Mutations', updateStocktakeLine: { __typename: 'StocktakeLineNode', id: string, stocktakeId: string, itemId: string, itemName: string, batch: string | null, expiryDate: string | null, manufactureDate: string | null, packSize: number | null, snapshotNumberOfPacks: number, countedNumberOfPacks: number | null, comment: string | null, costPricePerPack: number | null, sellPricePerPack: number | null, volumePerPack: number, item: { __typename: 'ItemNode', id: string, code: string, name: string, unitName: string | null }, location: { __typename: 'LocationNode', id: string, code: string, name: string } | null, reasonOption: { __typename: 'ReasonOptionNode', id: string, reason: string, type: ReasonOptionNodeType } | null, manufacturer: { __typename: 'NameNode', id: string, name: string } | null } | { __typename: 'UpdateStocktakeLineError', error: { __typename: 'AdjustmentReasonNotProvided', description: string } | { __typename: 'AdjustmentReasonNotValid', description: string } | { __typename: 'CannotEditStocktake', description: string } | { __typename: 'SnapshotCountCurrentCountMismatchLine', description: string } | { __typename: 'StockLineReducedBelowZero', description: string } } };
 
 export type DeleteStocktakeLineMutationVariables = Exact<{
   storeId: Scalars['String']['input'];
@@ -12223,6 +12276,23 @@ export type ReasonOptionsQueryVariables = Exact<{
 
 export type ReasonOptionsQuery = { __typename?: 'Queries', reasonOptions: { __typename: 'ReasonOptionConnector', totalCount: number, nodes: Array<{ __typename: 'ReasonOptionNode', id: string, reason: string, type: ReasonOptionNodeType, isActive: boolean }> } };
 
+export const StocktakeRowFragmentDoc = gql`
+    fragment StocktakeRow on StocktakeNode {
+  __typename
+  id
+  stocktakeNumber
+  status
+  description
+  comment
+  createdDatetime
+  finalisedDatetime
+  isLocked
+  lines {
+    __typename
+    totalCount
+  }
+}
+    `;
 export const StocktakeLineRowFragmentDoc = gql`
     fragment StocktakeLineRow on StocktakeLineNode {
   __typename
@@ -12259,8 +12329,103 @@ export const StocktakeLineRowFragmentDoc = gql`
     reason
     type
   }
+  manufacturer(storeId: $storeId) {
+    __typename
+    id
+    name
+  }
 }
     `;
+export const StocktakesDocument = gql`
+    query Stocktakes($storeId: String!, $page: PaginationInput, $sort: [StocktakeSortInput!], $filter: StocktakeFilterInput) {
+  stocktakes(storeId: $storeId, page: $page, sort: $sort, filter: $filter) {
+    ... on StocktakeConnector {
+      __typename
+      totalCount
+      nodes {
+        ...StocktakeRow
+      }
+    }
+  }
+}
+    ${StocktakeRowFragmentDoc}`;
+export const InsertStocktakeDocument = gql`
+    mutation InsertStocktake($storeId: String!, $input: InsertStocktakeInput!) {
+  insertStocktake(storeId: $storeId, input: $input) {
+    __typename
+    ... on StocktakeNode {
+      id
+      stocktakeNumber
+    }
+  }
+}
+    `;
+export const DeleteStocktakeDocument = gql`
+    mutation DeleteStocktake($storeId: String!, $input: DeleteStocktakeInput!) {
+  deleteStocktake(storeId: $storeId, input: $input) {
+    __typename
+    ... on DeleteResponse {
+      id
+    }
+  }
+}
+    `;
+export const UpdateStocktakeDocument = gql`
+    mutation UpdateStocktake($storeId: String!, $input: UpdateStocktakeInput!) {
+  updateStocktake(storeId: $storeId, input: $input) {
+    __typename
+    ... on StocktakeNode {
+      id
+      status
+      isLocked
+      description
+      comment
+    }
+    ... on UpdateStocktakeError {
+      __typename
+      error {
+        __typename
+        description
+      }
+    }
+  }
+}
+    `;
+export const ItemsDocument = gql`
+    query Items($storeId: String!, $filter: ItemFilterInput, $page: PaginationInput) {
+  items(storeId: $storeId, filter: $filter, page: $page) {
+    ... on ItemConnector {
+      __typename
+      totalCount
+      nodes {
+        __typename
+        id
+        code
+        name
+        unitName
+        defaultPackSize
+      }
+    }
+  }
+}
+    `;
+export const InsertStocktakeLineDocument = gql`
+    mutation InsertStocktakeLine($storeId: String!, $input: InsertStocktakeLineInput!) {
+  insertStocktakeLine(storeId: $storeId, input: $input) {
+    __typename
+    ... on StocktakeLineNode {
+      ...StocktakeLineRow
+    }
+    ... on InsertStocktakeLineError {
+      __typename
+      error {
+        __typename
+        description
+      }
+    }
+  }
+}
+    ${StocktakeLineRowFragmentDoc}`;
 export const StocktakeDocument = gql`
     query Stocktake($stocktakeId: String!, $storeId: String!) {
   stocktake(id: $stocktakeId, storeId: $storeId) {
@@ -12353,6 +12518,24 @@ const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationTy
 
 export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = defaultWrapper) {
   return {
+    Stocktakes(variables: StocktakesQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<StocktakesQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<StocktakesQuery>({ document: StocktakesDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'Stocktakes', 'query', variables);
+    },
+    InsertStocktake(variables: InsertStocktakeMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<InsertStocktakeMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<InsertStocktakeMutation>({ document: InsertStocktakeDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'InsertStocktake', 'mutation', variables);
+    },
+    DeleteStocktake(variables: DeleteStocktakeMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<DeleteStocktakeMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<DeleteStocktakeMutation>({ document: DeleteStocktakeDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'DeleteStocktake', 'mutation', variables);
+    },
+    UpdateStocktake(variables: UpdateStocktakeMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<UpdateStocktakeMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<UpdateStocktakeMutation>({ document: UpdateStocktakeDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'UpdateStocktake', 'mutation', variables);
+    },
+    Items(variables: ItemsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<ItemsQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<ItemsQuery>({ document: ItemsDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'Items', 'query', variables);
+    },
+    InsertStocktakeLine(variables: InsertStocktakeLineMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<InsertStocktakeLineMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<InsertStocktakeLineMutation>({ document: InsertStocktakeLineDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'InsertStocktakeLine', 'mutation', variables);
+    },
     Stocktake(variables: StocktakeQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<StocktakeQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<StocktakeQuery>({ document: StocktakeDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'Stocktake', 'query', variables);
     },

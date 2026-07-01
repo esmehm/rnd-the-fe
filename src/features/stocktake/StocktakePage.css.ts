@@ -4,16 +4,58 @@ import { vars } from '../../styles/theme.css';
 export const page = style({
   display: 'flex',
   flexDirection: 'column',
-  height: '100vh',
+  height: '100%',
+  minHeight: 0,
   padding: vars.space.lg,
   gap: vars.space.md,
 });
+
+export const breadcrumb = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: vars.space.sm,
+  fontSize: vars.font.sizeSm,
+  color: vars.color.textMuted,
+});
+export const crumbLink = style({
+  color: vars.color.textLink,
+  textDecoration: 'none',
+  selectors: { '&:hover': { textDecoration: 'underline' } },
+});
+export const crumbSep = style({ color: vars.color.borderStrong });
 
 export const headerBar = style({
   display: 'flex',
   alignItems: 'center',
   gap: vars.space.md,
   flexWrap: 'wrap',
+});
+
+export const onHold = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: vars.space.xs,
+  fontSize: vars.font.sizeSm,
+  color: vars.color.textMuted,
+  cursor: 'pointer',
+  userSelect: 'none',
+});
+
+export const descriptionRow = style({ display: 'flex', alignItems: 'center', gap: vars.space.md });
+export const descLabel = style({ fontSize: vars.font.sizeSm, color: vars.color.textMuted, fontWeight: vars.font.weightMedium });
+export const descInput = style({
+  flex: 1,
+  maxWidth: '520px',
+  height: vars.size.control,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.sm,
+  padding: `0 ${vars.space.md}`,
+  fontSize: vars.font.sizeMd,
+  background: vars.color.surface,
+  selectors: {
+    '&:focus': { outline: 'none', borderColor: vars.color.focusRing },
+    '&:disabled': { background: vars.color.surfaceAlt, color: vars.color.textMuted },
+  },
 });
 
 export const title = style({
