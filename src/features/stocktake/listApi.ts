@@ -95,6 +95,78 @@ export function useItemSearch(search: string, enabled: boolean) {
   });
 }
 
+export interface SaveLineDraft {
+  id?: string; // existing line -> update; absent -> insert
+  itemId: string;
+  batch: string | null;
+  expiryDate: string | null; // YYYY-MM-DD
+  manufactureDate: string | null;
+  packSize: number | null;
+  countedNumberOfPacks: number;
+  reasonOptionId?: string;
+  costPricePerPack: number | null;
+  sellPricePerPack: number | null;
+  volumePerPack: number | null;
+}
+
+// Upsert a set of batches for one item: update existing lines, insert new ones.
+// Sequential so we can surface the first backend error (e.g. missing adjustment reason).
+export function useSaveStocktakeLines(stocktakeId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (drafts: SaveLineDraft[]) => {
+      for (const d of drafts) {
+        if (d.id) {
+          const res = await sdk.UpdateStocktakeLine({
+            storeId: STORE_ID,
+            input: {
+              id: d.id,
+              countedNumberOfPacks: d.countedNumberOfPacks,
+              batch: d.batch,
+              expiryDate: { value: d.expiryDate },
+              manufactureDate: { value: d.manufactureDate },
+              packSize: d.packSize ?? undefined,
+              reasonOptionId: d.reasonOptionId,
+              costPricePerPack: d.costPricePerPack ?? undefined,
+              sellPricePerPack: d.sellPricePerPack ?? undefined,
+              volumePerPack: d.volumePerPack ?? undefined,
+            },
+          });
+          if (res.updateStocktakeLine.__typename === 'UpdateStocktakeLineError') {
+            throw new Error(res.updateStocktakeLine.error.description);
+          }
+        } else {
+          const res = await sdk.InsertStocktakeLine({
+            storeId: STORE_ID,
+            input: {
+              id: crypto.randomUUID(),
+              stocktakeId,
+              itemId: d.itemId,
+              countedNumberOfPacks: d.countedNumberOfPacks,
+              batch: d.batch,
+              expiryDate: d.expiryDate,
+              manufactureDate: d.manufactureDate,
+              packSize: d.packSize ?? undefined,
+              reasonOptionId: d.reasonOptionId,
+              costPricePerPack: d.costPricePerPack ?? undefined,
+              sellPricePerPack: d.sellPricePerPack ?? undefined,
+              volumePerPack: d.volumePerPack ?? undefined,
+            },
+          });
+          if (res.insertStocktakeLine.__typename === 'InsertStocktakeLineError') {
+            throw new Error(res.insertStocktakeLine.error.description);
+          }
+        }
+      }
+      return drafts.length;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['stocktakeLines'] });
+      qc.invalidateQueries({ queryKey: ['stocktake', stocktakeId] });
+    },
+  });
+}
+
 export function useInsertStocktakeLine(stocktakeId: string) {
   const qc = useQueryClient();
   return useMutation({

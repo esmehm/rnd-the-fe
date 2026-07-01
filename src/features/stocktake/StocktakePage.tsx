@@ -11,9 +11,9 @@ import {
   type SortKey,
   type StocktakeLine,
 } from './api';
-import { useUpdateStocktake } from './listApi';
+import { useUpdateStocktake, useSaveStocktakeLines, type SaveLineDraft } from './listApi';
 import { StocktakeTable } from './StocktakeTable';
-import { EditLineModal } from './EditLineModal';
+import { EditItemModal } from './EditItemModal';
 import { AddItemModal } from './AddItemModal';
 import * as p from './StocktakePage.css';
 import * as ui from '../../ui/uikit.css';
@@ -29,7 +29,7 @@ export function StocktakePage() {
   const [sortKey, setSortKey] = useState<SortKey>('itemName');
   const [sortDesc, setSortDesc] = useState(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const [editLine, setEditLine] = useState<StocktakeLine | null>(null);
+  const [editItemId, setEditItemId] = useState<string | null>(null);
   const [addItemOpen, setAddItemOpen] = useState(false);
   const [descDraft, setDescDraft] = useState('');
   const [toast, setToast] = useState<string | null>(null);
@@ -59,6 +59,7 @@ export function StocktakePage() {
   const updateLine = useUpdateStocktakeLine(stocktakeId);
   const deleteLines = useDeleteStocktakeLines(stocktakeId);
   const updateStocktake = useUpdateStocktake(stocktakeId);
+  const saveLines = useSaveStocktakeLines(stocktakeId);
 
   const stocktake = stocktakeQuery.data;
   const isFinalised = stocktake?.status === 'FINALISED';
@@ -135,6 +136,13 @@ export function StocktakePage() {
 
   const lines = linesQuery.data?.nodes ?? [];
   const total = linesQuery.data?.totalCount ?? stocktake?.lines.totalCount ?? 0;
+
+  // Multi-batch edit modal: group the clicked item's batches; "OK & next" walks items.
+  const distinctItemIds = [...new Set(lines.map((l) => l.itemId))];
+  const editLines = editItemId ? lines.filter((l) => l.itemId === editItemId) : [];
+  const editItem = editLines[0]?.item;
+  const editIdx = editItemId ? distinctItemIds.indexOf(editItemId) : -1;
+  const nextItemId = editIdx >= 0 && editIdx < distinctItemIds.length - 1 ? distinctItemIds[editIdx + 1] : null;
 
   return (
     <div className={p.page}>
@@ -227,7 +235,7 @@ export function StocktakePage() {
             onRowSelectionChange={setRowSelection}
             reasonOptions={reasonsQuery.data ?? []}
             disabled={disabled}
-            openEdit={setEditLine}
+            openEdit={(line) => setEditItemId(line.itemId)}
             saveCounted={saveCounted}
             saveReason={saveReason}
           />
@@ -242,18 +250,22 @@ export function StocktakePage() {
 
       {addItemOpen && <AddItemModal stocktakeId={stocktakeId} onClose={() => setAddItemOpen(false)} />}
 
-      {editLine && (
-        <EditLineModal
-          line={editLine}
+      {editItemId && editItem && (
+        <EditItemModal
+          key={editItemId}
+          item={{ id: editItem.id, code: editItem.code, name: editItem.name, unitName: editItem.unitName }}
+          lines={editLines}
           reasonOptions={reasonsQuery.data ?? []}
           disabled={disabled}
-          onClose={() => setEditLine(null)}
-          onSave={(input) => {
-            updateLine.mutate(
-              { id: editLine.id, ...input },
-              { onSuccess: () => setEditLine(null) },
-            );
-          }}
+          saving={saveLines.isPending}
+          hasNext={!!nextItemId}
+          onClose={() => setEditItemId(null)}
+          onSave={(drafts: SaveLineDraft[]) =>
+            saveLines.mutate(drafts, { onSuccess: () => setEditItemId(null), onError: flashError })
+          }
+          onSaveAndNext={(drafts: SaveLineDraft[]) =>
+            saveLines.mutate(drafts, { onSuccess: () => setEditItemId(nextItemId), onError: flashError })
+          }
         />
       )}
     </div>
