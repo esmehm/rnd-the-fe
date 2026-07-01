@@ -1,0 +1,17 @@
+{
+  "runCommand": "npm run dev",
+  "baseUrl": "http://localhost:3100",
+  "login": { "required": false, "note": "backend runs debug_no_access_control; no auth needed" },
+  "framework": "React 19 + TanStack Query (graphql-request)",
+  "dataRequestUrlPattern": "/graphql",
+  "scenarios": [
+    {
+      "name": "stocktake-thin-react",
+      "path": "/stocktake/019f17d0-1444-795c-ac53-da2216c73cff",
+      "readySignal": "[data-testid=\"stocktake-row\"]",
+      "dataItemCountSelector": "[data-testid=\"stocktake-lines\"]",
+      "dataItemCountAttribute": "data-line-count",
+      "note": "Reference stocktake #112, ~1,506 lines, CHC Ermera store"
+    }
+  ]
+}

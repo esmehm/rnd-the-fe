@@ -1,0 +1,125 @@
+# Operations for the stocktake detail screen. A deliberately lean fragment
+# (only what the table + edit modal render) — keeping the payload small is itself
+# one of the perf levers we are testing.
+
+fragment StocktakeLineRow on StocktakeLineNode {
+  __typename
+  id
+  stocktakeId
+  itemId
+  itemName
+  batch
+  expiryDate
+  manufactureDate
+  packSize
+  snapshotNumberOfPacks
+  countedNumberOfPacks
+  comment
+  costPricePerPack
+  sellPricePerPack
+  volumePerPack
+  item {
+    __typename
+    id
+    code
+    name
+    unitName
+  }
+  location {
+    __typename
+    id
+    code
+    name
+  }
+  reasonOption {
+    __typename
+    id
+    reason
+    type
+  }
+}
+
+query Stocktake($stocktakeId: String!, $storeId: String!) {
+  stocktake(id: $stocktakeId, storeId: $storeId) {
+    __typename
+    ... on StocktakeNode {
+      id
+      stocktakeNumber
+      status
+      description
+      comment
+      isLocked
+      createdDatetime
+      finalisedDatetime
+      lines {
+        __typename
+        totalCount
+      }
+    }
+  }
+}
+
+query StocktakeLines(
+  $stocktakeId: String!
+  $storeId: String!
+  $page: PaginationInput
+  $sort: [StocktakeLineSortInput!]
+  $filter: StocktakeLineFilterInput
+) {
+  stocktakeLines(
+    stocktakeId: $stocktakeId
+    storeId: $storeId
+    page: $page
+    sort: $sort
+    filter: $filter
+  ) {
+    ... on StocktakeLineConnector {
+      __typename
+      totalCount
+      nodes {
+        ...StocktakeLineRow
+      }
+    }
+  }
+}
+
+mutation UpdateStocktakeLine($storeId: String!, $input: UpdateStocktakeLineInput!) {
+  updateStocktakeLine(storeId: $storeId, input: $input) {
+    __typename
+    ... on StocktakeLineNode {
+      ...StocktakeLineRow
+    }
+    ... on UpdateStocktakeLineError {
+      __typename
+      error {
+        __typename
+        description
+      }
+    }
+  }
+}
+
+mutation DeleteStocktakeLine($storeId: String!, $input: DeleteStocktakeLineInput!) {
+  deleteStocktakeLine(storeId: $storeId, input: $input) {
+    __typename
+    ... on DeleteResponse {
+      id
+    }
+  }
+}
+
+query ReasonOptions($filter: ReasonOptionFilterInput) {
+  reasonOptions(filter: $filter) {
+    ... on ReasonOptionConnector {
+      __typename
+      totalCount
+      nodes {
+        __typename
+        id
+        reason
+        type
+        isActive
+      }
+    }
+  }
+}
