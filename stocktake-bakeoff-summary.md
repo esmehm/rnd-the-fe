@@ -153,6 +153,14 @@ TanStack Virtual list; `'use no memo'` on the phone-only cards restores it while
 full compiler optimisation. Re-measure (commit `11bc72d`): **~730 ms data-render, 894 DOM, CLS 0** — table
 load path unchanged. Win intact.
 
+This was an explicit **visual-alignment** pass — pull the new screen closer to the old FE (and the UI
+standards) where it aids recognition — with a few **conscious divergences** kept, not accidental drift.
+The main one: the header actions stay **semantic buttons** (solid orange *Confirm finalised*, red
+*Delete*) rather than the old FE's uniform outlined pills with destructive actions hidden under *More* —
+because colour + text is a stronger, more accessible affordance and surfacing *Delete* beats burying it.
+So the screen reads as the same family as the old FE, but deliberately improves on it in a couple of
+places rather than copying pixel-for-pixel.
+
 ## Exploratory testing vs the new build — how effective was it?
 
 The other RnD strand is a **behaviour-anchored exploratory AI agent** (Opus 4.8, driving the UI via
@@ -177,10 +185,13 @@ edit-protection, no blank-item-name write bug), and proposed **5 new "gap" behav
 mapped to no existing ID — including the exact hole behind Finding 1 ("Add-item must load the item's
 existing batches with real snapshots").
 
-**Effectiveness read:**
-- The headline is **Finding 1**: a **data-integrity** defect that silently doubles stock — the class of
-  bug perf metrics, type-checks and load tests never see — caught in ~26 min and **verified against the
-  database**, not just the UI.
+**Effectiveness read — the methodology worked: it found a real one.**
+- **Finding 1 is confirmed real (root-caused), not a false positive — that *is* the success.** A
+  **data-integrity** defect that silently doubles stock, the class of bug perf metrics, type-checks and
+  load tests never see, caught in ~26 min and **verified against the database**, not just the UI. Root
+  cause (**FE bug**): Add-item inserts an *unlinked* line (no `stockLineId`), so the backend correctly
+  posts *new* stock on finalise; the old FE links each line via `stockLineId` (its `toInsert` XOR), which
+  is why it never double-counted. **Not fixed yet** — logged for the fix pass.
 - Every finding is **anchored to a behaviour ID or proposes one**, so it feeds straight back into the
   regression suite / parity matrix rather than being a throwaway note.
 - **Contrast with the old FE:** the *same* workflow run against v3 (`22cdf6eeb6`) was **blocked at "open a
@@ -188,8 +199,13 @@ existing batches with real snapshots").
   *and* confirmed the rewrite unblocks the workflow the old run couldn't complete. *(That v3 run had
   concurrent-session contamination; treat the contrast as directional.)*
 
-**These are open bugs in the Thin React prototype** — Findings 1 & 2 in particular should be fixed before
-it's parity-complete. Full run: `tmf-testing` → `projects/oms/core/exploratory/runs/stocktake-findings-fe-rewrite-11bc72d.md`.
+**These are open, real bugs in the Thin React prototype** — Findings 1 & 2 in particular should be fixed
+before it's parity-complete (Finding 1 root-cause above; **not fixed yet**). Full run: `tmf-testing` →
+`projects/oms/core/exploratory/runs/stocktake-findings-fe-rewrite-11bc72d.md`.
+
+> **Deterministic side incoming.** The behaviour-anchored **deterministic** parity suite (same Playwright
+> specs, `BASE_URL`-swapped between old and new FE) is **running against the new FE now** — the cross-FE
+> pass matrix will be added here when it lands.
 
 ## Coverage vs the original brief
 

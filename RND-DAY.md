@@ -142,7 +142,7 @@ tagged tests against each prototype and see which pass unchanged. This is the br
 | Deterministic **stocktake** suite (the chosen PoC page) | open-msupply-uno (WIP) | 🟡 21 tests, ~30 INV-03/04 + SMV-01 behaviour IDs |
 | Runnable **exploratory** stocktake + setup workflows | tmf-testing PR #10 | ✅ anchored to behaviour IDs |
 | **Exploratory agent** run against the **new FE** | this repo @ `11bc72d` | ✅ full workflow walked (~24 behaviours, ~26 min); **5 findings incl. 1 HIGH** data-integrity (Add-item double-count) |
-| **Deterministic** tests run on **new FE** → build the matrix | this repo (Thin React) | ⬜ next — needs testid/role parity check |
+| **Deterministic** tests run on **new FE** → build the matrix | this repo (Thin React) | 🟡 running now — cross-FE pass matrix incoming |
 
 ---
 
@@ -173,15 +173,17 @@ tagged tests against each prototype and see which pass unchanged. This is the br
 - Behaviour-ID single source of truth + CI guard; parity + testing strategy docs.
 - Deterministic distribution suite (behaviour-anchored) + runnable exploratory stocktake.
 - **Exploratory agent run against the rewrite (`11bc72d`)** — walked the full stocktake workflow and found a
-  **HIGH data-integrity bug** (Add-item double-count) + 4 more in ~26 min, each anchored to a behaviour ID.
+  **HIGH data-integrity bug** (Add-item double-count, root-caused to the FE) + 4 more in ~26 min, each
+  anchored to a behaviour ID. *The methodology's first real catch on the rewrite.*
+- **Visual-parity pass** (align to old FE + UI standards; conscious button divergence kept) shipped in `11bc72d`.
 
 **In progress 🟡**
 - Stocktake deterministic suite (open-msupply-uno) — 21 tests wired to behaviour IDs.
 - Getting the distribution suite fully green again.
-- Visual alignment of the new FE to the old + new design guidelines.
+- **Deterministic parity suite running against the new FE** → cross-FE pass matrix (the demo) incoming.
 
 **Next / open ⬜**
-- Run the **same** deterministic tests against Thin React → produce the **cross-FE pass matrix** (the demo).
+- **Fix the exploratory findings**: Add-item double-count (FE — root-caused), blank pack-size validation + raw-error leak.
 - CI perf-budget gate (bundle-per-route + INP) — measured but not yet gating.
 - Solid arm (evidence-driven, optional): does dropping the VDOM buy more on top of ~4×?
 - Open decisions in the strategy docs: target-hardware-in-CI, visual-diff tolerance, public vs private tests.
