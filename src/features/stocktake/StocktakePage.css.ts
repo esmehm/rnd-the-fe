@@ -112,7 +112,38 @@ export const banner = style({
   fontSize: vars.font.sizeSm,
 });
 
+export const tabs = style({
+  display: 'flex',
+  gap: vars.space.lg,
+  borderBottom: `1px solid ${vars.color.border}`,
+});
+export const tab = style({
+  padding: `${vars.space.sm} ${vars.space.xs}`,
+  border: 'none',
+  background: 'transparent',
+  cursor: 'pointer',
+  fontSize: vars.font.sizeMd,
+  color: vars.color.textMuted,
+  borderBottom: '2px solid transparent',
+  marginBottom: '-1px',
+  selectors: {
+    '&[data-active="true"]': { color: vars.color.primary, borderBottomColor: vars.color.primary, fontWeight: vars.font.weightMedium },
+  },
+});
+
 export const tableWrap = style({ flex: 1, minHeight: 0 });
+
+export const logList = style({ listStyle: 'none', margin: 0, padding: 0 });
+export const logItem = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: vars.space.lg,
+  padding: `${vars.space.sm} ${vars.space.md}`,
+  borderBottom: `1px solid ${vars.color.border}`,
+  fontSize: vars.font.sizeMd,
+});
+export const logDate = style({ color: vars.color.textMuted, minWidth: 96, fontVariantNumeric: 'tabular-nums' });
+export const logType = style({ fontWeight: vars.font.weightMedium, textTransform: 'capitalize', minWidth: 180 });
 
 export const toast = style({
   position: 'fixed',

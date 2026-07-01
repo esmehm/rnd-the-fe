@@ -56,6 +56,13 @@ query Stocktake($stocktakeId: String!, $storeId: String!) {
       isLocked
       createdDatetime
       finalisedDatetime
+      countedBy
+      verifiedBy
+      user {
+        __typename
+        username
+        email
+      }
       lines {
         __typename
         totalCount

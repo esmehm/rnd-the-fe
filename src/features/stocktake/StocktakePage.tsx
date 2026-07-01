@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import type { RowSelectionState } from '@tanstack/react-table';
 import { DEFAULT_STOCKTAKE_ID } from '../../gql/client';
 import {
@@ -11,15 +11,24 @@ import {
   type SortKey,
   type StocktakeLine,
 } from './api';
-import { useUpdateStocktake, useSaveStocktakeLines, type SaveLineDraft } from './listApi';
+import {
+  useUpdateStocktake,
+  useSaveStocktakeLines,
+  useDeleteStocktakes,
+  useActivityLogs,
+  type SaveLineDraft,
+} from './listApi';
 import { StocktakeTable } from './StocktakeTable';
 import { EditItemModal } from './EditItemModal';
 import { AddItemModal } from './AddItemModal';
+import { MorePanel } from './MorePanel';
+import { formatDate } from './format';
 import * as p from './StocktakePage.css';
 import * as ui from '../../ui/uikit.css';
 
 export function StocktakePage() {
   const params = useParams();
+  const navigate = useNavigate();
   const stocktakeId = params.stocktakeId ?? DEFAULT_STOCKTAKE_ID;
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -31,6 +40,8 @@ export function StocktakePage() {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [editItemId, setEditItemId] = useState<string | null>(null);
   const [addItemOpen, setAddItemOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const [tab, setTab] = useState<'details' | 'log'>('details');
   const [descDraft, setDescDraft] = useState('');
   const [toast, setToast] = useState<string | null>(null);
   // A counted value that created a variance but hasn't been saved yet because the
@@ -60,6 +71,8 @@ export function StocktakePage() {
   const deleteLines = useDeleteStocktakeLines(stocktakeId);
   const updateStocktake = useUpdateStocktake(stocktakeId);
   const saveLines = useSaveStocktakeLines(stocktakeId);
+  const deleteStocktake = useDeleteStocktakes();
+  const activityLogs = useActivityLogs(stocktakeId, tab === 'log');
 
   const stocktake = stocktakeQuery.data;
   const isFinalised = stocktake?.status === 'FINALISED';
@@ -182,6 +195,9 @@ export function StocktakePage() {
         <button className={ui.buttonPrimary} disabled={isFinalised || updateStocktake.isPending} onClick={confirmFinalised}>
           Confirm finalised
         </button>
+        <button className={ui.button} onClick={() => setMoreOpen(true)} disabled={!stocktake}>
+          More
+        </button>
       </div>
 
       <div className={p.descriptionRow}>
@@ -206,41 +222,80 @@ export function StocktakePage() {
         </div>
       )}
 
-      <div className={p.toolbar}>
-        <input
-          className={p.filterInput}
-          type="search"
-          placeholder="Filter items by code or name…"
-          value={filterText}
-          onChange={(e) => setFilterText(e.target.value)}
-          aria-label="Filter items"
-        />
-        <span className={p.meta} data-testid="lines-count" data-count={lines.length}>
-          {linesQuery.isFetching ? 'Loading… ' : ''}
-          {lines.length.toLocaleString()} of {total.toLocaleString()} lines
-          {committedFilter ? ' (filtered)' : ''}
-        </span>
+      <div className={p.tabs} role="tablist">
+        <button className={p.tab} data-active={tab === 'details'} role="tab" aria-selected={tab === 'details'} onClick={() => setTab('details')}>
+          Details
+        </button>
+        <button className={p.tab} data-active={tab === 'log'} role="tab" aria-selected={tab === 'log'} onClick={() => setTab('log')}>
+          Log
+        </button>
       </div>
 
-      <div className={p.tableWrap}>
-        {linesQuery.isLoading ? (
-          <div className={p.centeredState}>Loading lines…</div>
-        ) : (
-          <StocktakeTable
-            lines={lines}
-            sortKey={sortKey}
-            sortDesc={sortDesc}
-            onToggleSort={onToggleSort}
-            rowSelection={rowSelection}
-            onRowSelectionChange={setRowSelection}
-            reasonOptions={reasonsQuery.data ?? []}
-            disabled={disabled}
-            openEdit={(line) => setEditItemId(line.itemId)}
-            saveCounted={saveCounted}
-            saveReason={saveReason}
-          />
-        )}
-      </div>
+      {tab === 'details' && (
+        <>
+          <div className={p.toolbar}>
+            <input
+              className={p.filterInput}
+              type="search"
+              placeholder="Filter items by code or name…"
+              value={filterText}
+              onChange={(e) => setFilterText(e.target.value)}
+              aria-label="Filter items"
+            />
+            <span className={p.meta} data-testid="lines-count" data-count={lines.length}>
+              {linesQuery.isFetching ? 'Loading… ' : ''}
+              {lines.length.toLocaleString()} of {total.toLocaleString()} lines
+              {committedFilter ? ' (filtered)' : ''}
+            </span>
+          </div>
+
+          <div className={p.tableWrap}>
+            {linesQuery.isLoading ? (
+              <div className={p.centeredState}>Loading lines…</div>
+            ) : (
+              <StocktakeTable
+                lines={lines}
+                sortKey={sortKey}
+                sortDesc={sortDesc}
+                onToggleSort={onToggleSort}
+                rowSelection={rowSelection}
+                onRowSelectionChange={setRowSelection}
+                reasonOptions={reasonsQuery.data ?? []}
+                disabled={disabled}
+                openEdit={(line) => setEditItemId(line.itemId)}
+                saveCounted={saveCounted}
+                saveReason={saveReason}
+              />
+            )}
+          </div>
+        </>
+      )}
+
+      {tab === 'log' && (
+        <div className={p.tableWrap} style={{ overflow: 'auto' }}>
+          {activityLogs.isLoading ? (
+            <div className={p.centeredState}>Loading log…</div>
+          ) : !(activityLogs.data ?? []).length ? (
+            <div className={p.centeredState}>No activity yet.</div>
+          ) : (
+            <ul className={p.logList}>
+              {(activityLogs.data ?? []).map((log) => (
+                <li key={log.id} className={p.logItem}>
+                  <span className={p.logDate}>{formatDate(log.datetime)}</span>
+                  <span className={p.logType}>{log.type.replace(/_/g, ' ').toLowerCase()}</span>
+                  {(log.from || log.to) && (
+                    <span className={p.meta}>
+                      {log.from ? `${log.from} → ` : ''}
+                      {log.to ?? ''}
+                    </span>
+                  )}
+                  <span className={p.meta}>{log.user?.username ?? ''}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       {toast && (
         <div className={p.toast} role="alert">
@@ -249,6 +304,21 @@ export function StocktakePage() {
       )}
 
       {addItemOpen && <AddItemModal stocktakeId={stocktakeId} onClose={() => setAddItemOpen(false)} />}
+
+      {moreOpen && stocktake && (
+        <MorePanel
+          stocktake={stocktake}
+          disabled={disabled}
+          onClose={() => setMoreOpen(false)}
+          onSaveComment={(comment) => updateStocktake.mutate({ comment }, { onError: flashError })}
+          onDelete={() =>
+            deleteStocktake.mutate([stocktakeId], {
+              onSuccess: () => navigate('/inventory/stocktakes'),
+              onError: flashError,
+            })
+          }
+        />
+      )}
 
       {editItemId && editItem && (
         <EditItemModal

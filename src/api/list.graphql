@@ -72,6 +72,27 @@ mutation UpdateStocktake($storeId: String!, $input: UpdateStocktakeInput!) {
   }
 }
 
+query ActivityLogs($storeId: String!, $recordId: String!) {
+  activityLogs(storeId: $storeId, filter: { recordId: { equalTo: $recordId } }, page: { first: 200 }) {
+    ... on ActivityLogConnector {
+      __typename
+      totalCount
+      nodes {
+        __typename
+        id
+        type
+        datetime
+        to
+        from
+        user {
+          __typename
+          username
+        }
+      }
+    }
+  }
+}
+
 query Items($storeId: String!, $filter: ItemFilterInput, $page: PaginationInput) {
   items(storeId: $storeId, filter: $filter, page: $page) {
     ... on ItemConnector {

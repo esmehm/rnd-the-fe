@@ -82,6 +82,17 @@ export function useUpdateStocktake(stocktakeId: string) {
   });
 }
 
+export function useActivityLogs(recordId: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ['activityLogs', recordId],
+    enabled,
+    queryFn: async () => {
+      const res = await sdk.ActivityLogs({ storeId: STORE_ID, recordId });
+      return res.activityLogs.nodes;
+    },
+  });
+}
+
 export function useItemSearch(search: string, enabled: boolean) {
   return useQuery({
     queryKey: keys.items(search),

@@ -12215,6 +12215,14 @@ export type UpdateStocktakeMutationVariables = Exact<{
 
 export type UpdateStocktakeMutation = { __typename?: 'Mutations', updateStocktake: { __typename: 'StocktakeNode', id: string, status: StocktakeNodeStatus, isLocked: boolean, description: string | null, comment: string | null } | { __typename: 'UpdateStocktakeError', error: { __typename: 'CannotEditStocktake', description: string } | { __typename: 'SnapshotCountCurrentCountMismatch', description: string } | { __typename: 'StockLinesReducedBelowZero', description: string } | { __typename: 'StocktakeIsLocked', description: string } } };
 
+export type ActivityLogsQueryVariables = Exact<{
+  storeId: Scalars['String']['input'];
+  recordId: Scalars['String']['input'];
+}>;
+
+
+export type ActivityLogsQuery = { __typename?: 'Queries', activityLogs: { __typename: 'ActivityLogConnector', totalCount: number, nodes: Array<{ __typename: 'ActivityLogNode', id: string, type: ActivityLogNodeType, datetime: string, to: string | null, from: string | null, user: { __typename: 'UserNode', username: string } | null }> } };
+
 export type ItemsQueryVariables = Exact<{
   storeId: Scalars['String']['input'];
   filter?: InputMaybe<ItemFilterInput>;
@@ -12240,7 +12248,7 @@ export type StocktakeQueryVariables = Exact<{
 }>;
 
 
-export type StocktakeQuery = { __typename?: 'Queries', stocktake: { __typename: 'NodeError' } | { __typename: 'StocktakeNode', id: string, stocktakeNumber: number, status: StocktakeNodeStatus, description: string | null, comment: string | null, isLocked: boolean, createdDatetime: string, finalisedDatetime: string | null, lines: { __typename: 'StocktakeLineConnector', totalCount: number } } };
+export type StocktakeQuery = { __typename?: 'Queries', stocktake: { __typename: 'NodeError' } | { __typename: 'StocktakeNode', id: string, stocktakeNumber: number, status: StocktakeNodeStatus, description: string | null, comment: string | null, isLocked: boolean, createdDatetime: string, finalisedDatetime: string | null, countedBy: string | null, verifiedBy: string | null, user: { __typename: 'UserNode', username: string, email: string | null } | null, lines: { __typename: 'StocktakeLineConnector', totalCount: number } } };
 
 export type StocktakeLinesQueryVariables = Exact<{
   stocktakeId: Scalars['String']['input'];
@@ -12391,6 +12399,32 @@ export const UpdateStocktakeDocument = gql`
   }
 }
     `;
+export const ActivityLogsDocument = gql`
+    query ActivityLogs($storeId: String!, $recordId: String!) {
+  activityLogs(
+    storeId: $storeId
+    filter: {recordId: {equalTo: $recordId}}
+    page: {first: 200}
+  ) {
+    ... on ActivityLogConnector {
+      __typename
+      totalCount
+      nodes {
+        __typename
+        id
+        type
+        datetime
+        to
+        from
+        user {
+          __typename
+          username
+        }
+      }
+    }
+  }
+}
+    `;
 export const ItemsDocument = gql`
     query Items($storeId: String!, $filter: ItemFilterInput, $page: PaginationInput) {
   items(storeId: $storeId, filter: $filter, page: $page) {
@@ -12439,6 +12473,13 @@ export const StocktakeDocument = gql`
       isLocked
       createdDatetime
       finalisedDatetime
+      countedBy
+      verifiedBy
+      user {
+        __typename
+        username
+        email
+      }
       lines {
         __typename
         totalCount
@@ -12529,6 +12570,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     UpdateStocktake(variables: UpdateStocktakeMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<UpdateStocktakeMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<UpdateStocktakeMutation>({ document: UpdateStocktakeDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'UpdateStocktake', 'mutation', variables);
+    },
+    ActivityLogs(variables: ActivityLogsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<ActivityLogsQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<ActivityLogsQuery>({ document: ActivityLogsDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'ActivityLogs', 'query', variables);
     },
     Items(variables: ItemsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<ItemsQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<ItemsQuery>({ document: ItemsDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'Items', 'query', variables);
