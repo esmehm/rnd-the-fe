@@ -212,8 +212,25 @@ Re-measured the detail screen (6× CPU, prod, 1,506 lines) to guard the win:
 | JS heap | 36 MB | **39 MB** | 97 MB |
 
 **The ~4× win holds.** All the parity features cost **+17 KB gzip** and left data-render time flat.
-DOM rose 496→860 — the per-cell `gridcell`/pin wrappers (frozen columns + ARIA grid) add ~1 div per
-visible cell — still **well under the old FE's 1,363**. (Optimisation available: wrap only pinned cells.)
+
+### Trade-off: per-cell wrappers vs. DOM node count (496 → 860)
+
+DOM nodes for the visible window rose from **496 to 860** when frozen columns + ARIA grid roles were
+added. Cause: **every cell is now wrapped in an extra `<div role="gridcell" style={sticky}>`.**
+
+- **Why the wrapper exists** — (1) a pinned/frozen column needs `position: sticky` on the *grid-track*
+  element, and cell content comes out of TanStack's `flexRender`, so we can't style it directly → we
+  wrap it; (2) the wrapper carries `role="gridcell"` for the WCAG grid pattern. So each cell went from
+  1 div to 2 (~14 cols × ~27 visible rows ≈ **~370 extra divs**).
+- **Why it's acceptable, not a regression** — 860 is still **below the old FE's 1,363** for the same
+  screen; it's **constant** (virtualisation renders only the visible window, not all 1,506 rows); and it
+  cost **~0 ms** (data-render 911 → 905 ms). DOM count is a *weight* metric, not the headline.
+- **The optimisation we did NOT take (deliberate):** only the 3 frozen columns (select, Code, Name)
+  actually need the sticky wrapper. Wrapping only those (and letting the other ~11 columns render as
+  their own cell div) would save **~300 nodes** (→ ~560). We kept the uniform wrapper because dropping
+  it means the non-frozen cells lose their explicit `role="gridcell"` (weaker a11y) unless the role is
+  pushed down into every cell component (more invasive). **Chosen: uniform `gridcell` a11y + simpler
+  code, at ~300 extra (constant, virtualised) nodes.** Revisit if DOM weight ever shows up in INP.
 
 ### Gotchas from the build-out
 
