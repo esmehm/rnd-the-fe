@@ -288,26 +288,29 @@ available in `run_code_unsafe`, so a separate browser *process* wasn't possible.
 never touched the other session's context; closed only my context, never the browser). Page-scoped 6× throttle,
 Event Timing, discarded warm-up, 2 runs.
 
-| Interaction (6× CPU) | Thin React | Old FE (MUI/MRT) |
-|---|---|---|
-| Cell-edit (type counted) | **32–40 ms** | — (old FE edits via the modal, no inline cell) |
-| Sort (header click) | 40–48 ms | ~64 ms |
-| **Row-select (checkbox)** | **48–56 ms** | **~304 ms (~6× slower)** |
-| Open edit modal | **~224 ms** (worst) | not captured (its modal didn't open via automation) |
-| Scroll worst frame | 13–35 ms | 12 ms (both 0 long >50 ms frames) |
+| Interaction (6× CPU) | Thin React | Old FE (MUI/MRT) | Gap |
+|---|---|---|---|
+| Cell-edit (type counted) | **32–40 ms** | — (old FE edits via the modal, no inline cell) | — |
+| Sort (header click) | 40–48 ms | ~64 ms | ~comparable |
+| **Row-select (checkbox)** | **48–56 ms** | **~304 ms** | **~6×** |
+| **Open edit modal** (warmed) | **104 ms** | **1,144 ms** | **~11×** |
+| Scroll worst frame | 13–35 ms | 12 ms (both 0 long >50 ms frames) | ~comparable |
 
-**Read:** in a clean context, Thin React's interactions are all fast (≤ ~56 ms except the React Aria modal
-mount ~224 ms). The one solidly-comparable heavier interaction — **row-select — is ~6× faster** (48 vs 304 ms:
-selecting a row re-renders the visible window, and MRT/emotion make that far heavier). Sort is comparable; both
-scroll smoothly (both virtualise). **Correction:** the earlier 752 ms old-FE sort / 888 ms first-interaction
-were **shared-browser contention** — they dropped to ~64 ms / ~144 ms once isolated, so discount them.
-Confirms the load-bake-off story on the interaction axis, and that **INP is not a Thin-React problem** → Solid
-stays optional. Old-FE **open-modal INP** still uncaptured (its edit modal doesn't open via a row-cell click
-under automation) — the one remaining hole.
+**Read:** in a clean context, every Thin React interaction is fast (≤ ~104 ms). The two heavy interactions are
+where MUI/emotion/MRT hurt most: **row-select ~6×** (re-rendering the visible window) and **opening the edit
+modal ~11×** (1.14 s to mount the MUI dialog — item combobox + tabs + sub-grid of selects — vs React Aria's
+104 ms; 1.14 s is "poor" INP, 104 ms is "good"). Sort is comparable (cheap in both); both scroll smoothly (both
+virtualise). **Correction:** the earlier 752 ms old-FE sort / 888 ms first-interaction were **shared-browser
+contention** — they dropped to ~64 ms / ~144 ms once isolated, so discount them.
 
-## Still to do
+How the old-FE modal opens (for the record): the MRT row has **no inner links/buttons** — the row `onClick`
+opens it; clicking the Name cell (`td` index 2) or the row works. Earlier failures were (a) ordering
+(open-modal after a header-sort left a MUI menu backdrop intercepting clicks) and (b) reading Event Timing too
+soon; fixed by an open→close→open warm-up and a 2.2 s settle.
 
-- **Old-FE open-modal INP** — find how its edit-line modal opens under automation (row-cell click didn't) to fill the last cell of the table.
+**Conclusion:** INP confirms the load-bake-off story on the interaction axis — Thin React is 6–11× snappier on
+the heavy interactions and never worse. INP is decidedly **not** a Thin-React problem → the Solid arm stays an
+optional bet, not a necessity.
 - **Full i18n** string extraction (i18next pattern established for key strings) + RTL via CSS logical props.
 - Full arrow-key roving-tabindex grid keyboard nav (ARIA roles + resize/sort focus are in; cell-to-cell nav is the remaining WCAG item).
 - Lower-value view polish: **Group by item**, **column reorder**, **persisted table state**, structured list **Filters**, **Print/report**.
