@@ -280,28 +280,34 @@ reconciliation) — and it's comfortably acceptable, i.e. **evidence that the re
 bottleneck for these interactions**, so the Solid arm stays an optional bet rather than a necessity.
 Not yet done: the **old-FE INP** for a head-to-head (needs driving its authed screen).
 
-### Old-FE INP (partial, contended)
+### INP head-to-head — isolated context (both apps, same 6× CPU)
 
-Attempted the head-to-head, but the shared Playwright browser was in use by another session and the old FE's
-authed screen kept dropping to `/login` (and is slow: ~4 s / 14 GraphQL calls). Deliberately **did not log in
-/ switch store on the shared context** (it would change the other session's store mid-task). One clean run
-landed before auth dropped:
+The shared MCP browser was in use by another session, and `require('playwright')`/dynamic import aren't
+available in `run_code_unsafe`, so a separate browser *process* wasn't possible. Instead ran both apps in a
+**fresh isolated `browser.newContext()`** (incognito-style: own cookies, so the old-FE login + store selection
+never touched the other session's context; closed only my context, never the browser). Page-scoped 6× throttle,
+Event Timing, discarded warm-up, 2 runs.
 
-| Interaction (6× CPU) | Thin React | Old FE |
+| Interaction (6× CPU) | Thin React | Old FE (MUI/MRT) |
 |---|---|---|
-| First interaction (warm-up) | 144 ms | **888 ms** (~6×) |
-| **Sort** (header click) | 184–256 ms | **752 ms** (~3×) |
-| Open edit modal | 296 ms | not captured |
-| Row-select | 200 ms | not captured |
-| Scroll worst frame | 13 ms | 15 ms (comparable — both virtualise) |
+| Cell-edit (type counted) | **32–40 ms** | — (old FE edits via the modal, no inline cell) |
+| Sort (header click) | 40–48 ms | ~64 ms |
+| **Row-select (checkbox)** | **48–56 ms** | **~304 ms (~6× slower)** |
+| Open edit modal | **~224 ms** (worst) | not captured (its modal didn't open via automation) |
+| Scroll worst frame | 13–35 ms | 12 ms (both 0 long >50 ms frames) |
 
-**Directional read:** old-FE interactions are ~3× heavier under throttle (the one clean point, sort, + the
-first-interaction cost), consistent with the load bake-off; scroll is comparable. Not a full set — redo when
-the shared browser is free (or in a dedicated browser / with fresh login) to complete open-modal + row-select.
+**Read:** in a clean context, Thin React's interactions are all fast (≤ ~56 ms except the React Aria modal
+mount ~224 ms). The one solidly-comparable heavier interaction — **row-select — is ~6× faster** (48 vs 304 ms:
+selecting a row re-renders the visible window, and MRT/emotion make that far heavier). Sort is comparable; both
+scroll smoothly (both virtualise). **Correction:** the earlier 752 ms old-FE sort / 888 ms first-interaction
+were **shared-browser contention** — they dropped to ~64 ms / ~144 ms once isolated, so discount them.
+Confirms the load-bake-off story on the interaction axis, and that **INP is not a Thin-React problem** → Solid
+stays optional. Old-FE **open-modal INP** still uncaptured (its edit modal doesn't open via a row-cell click
+under automation) — the one remaining hole.
 
 ## Still to do
 
-- **Complete old-FE INP** (open-modal + row-select) for a full head-to-head — needs a free browser + fresh old-FE login.
+- **Old-FE open-modal INP** — find how its edit-line modal opens under automation (row-cell click didn't) to fill the last cell of the table.
 - **Full i18n** string extraction (i18next pattern established for key strings) + RTL via CSS logical props.
 - Full arrow-key roving-tabindex grid keyboard nav (ARIA roles + resize/sort focus are in; cell-to-cell nav is the remaining WCAG item).
 - Lower-value view polish: **Group by item**, **column reorder**, **persisted table state**, structured list **Filters**, **Print/report**.

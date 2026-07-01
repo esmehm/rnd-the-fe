@@ -145,7 +145,7 @@ manufacturer + comment). These are on-demand modals/handlers, so the re-measure 
 | Bake-off vs current app under **6× CPU** (§8) | ✅ (~4× faster, ~5.6× smaller) |
 | §8 metrics: LCP · bundle-per-route | ✅ |
 | §8 metric: **rows-before-jank** | 🟡 all 1,506 virtualised w/ no jank; didn't push to 10k/100k |
-| §8 metric: **INP** (cell-edit, scroll) | 🟡 Thin React (6× CPU): INP ≈ **296 ms** (modal), cell-edit **88 ms**, scroll 13 ms. Old FE partial (shared browser contended): **sort ~752 ms vs ~256 ms (~3×)**, scroll comparable; open-modal/select still to capture. |
+| §8 metric: **INP** (cell-edit, scroll) | ✅ measured both (6× CPU, isolated context). Thin React: cell-edit **32–40 ms**, sort 40–48, row-select 48–56, modal ~**224 ms** (worst); scroll smooth. Old FE: **row-select ~304 ms (~6× slower)**, sort ~64; both scroll smooth. Only hole: old-FE modal INP (its modal didn't open via automation). |
 | §8: **slow network** throttle | ❌ CPU-only |
 | §8: **Solid arm** (3rd implementation) | ❌ not built (evidence-driven optional) |
 | Stack: vanilla-extract · React Aria · TanStack Table/Virtual · Rspack · React 19+Compiler · codegen | ✅ |
