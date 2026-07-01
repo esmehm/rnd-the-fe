@@ -95,7 +95,7 @@ export const headerCell = style({
   padding: `0 ${vars.space.md}`,
   fontSize: vars.font.sizeSm,
   fontWeight: vars.font.weightBold,
-  color: vars.color.textMuted,
+  color: vars.color.text,
   userSelect: 'none',
   whiteSpace: 'nowrap',
   overflow: 'hidden',
@@ -103,9 +103,13 @@ export const headerCell = style({
   background: vars.color.headerBg,
 });
 
+// Right-aligned header for numeric columns. Headers MUST match cell alignment
+// (UI standards: right-aligned cells => right-aligned headers).
+export const headerCellNumeric = style([headerCell, { justifyContent: 'flex-end' }]);
+
 export const headerSortable = style({
   cursor: 'pointer',
-  selectors: { '&:hover': { color: vars.color.text } },
+  selectors: { '&:hover': { color: vars.color.primary } },
 });
 
 export const sortIndicator = style({
@@ -161,6 +165,10 @@ export const editableCell = style([
   { background: vars.color.editableBg, padding: `0 ${vars.space.xs}` },
 ]);
 
+// Expiry highlighting — colour + weight; an appended glyph carries the meaning too.
+export const expiryExpired = style([cell, { color: vars.color.diffNegative, fontWeight: vars.font.weightMedium }]);
+export const expirySoon = style([cell, { color: vars.color.warning, fontWeight: vars.font.weightMedium }]);
+
 export const diffPositive = style({ color: vars.color.diffPositive, fontWeight: vars.font.weightMedium });
 export const diffNegative = style({ color: vars.color.diffNegative, fontWeight: vars.font.weightMedium });
 
@@ -180,15 +188,21 @@ export const inlineInput = style({
   },
 });
 
+// Item-name cell: plain charcoal text (matches old FE) that opens the edit modal.
+// Affordance is the hover underline + pointer, not a hyperlink colour.
 export const linkCell = style([
   cellTruncate,
   {
-    color: vars.color.textLink,
+    color: vars.color.text,
     cursor: 'pointer',
     padding: `0 ${vars.space.md}`,
     display: 'flex',
     alignItems: 'center',
-    selectors: { '&:hover': { textDecoration: 'underline' } },
+    borderRadius: vars.radius.sm,
+    selectors: {
+      '&:hover': { color: vars.color.primary, textDecoration: 'underline' },
+      '&:focus-visible': { outline: `2px solid ${vars.color.focusRing}`, outlineOffset: '-2px' },
+    },
   },
 ]);
 

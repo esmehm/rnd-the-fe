@@ -1,6 +1,6 @@
 import type { ColumnDef, RowData } from '@tanstack/react-table';
 import type { ReasonOption, SortKey, StocktakeLine } from './api';
-import { formatDate } from './format';
+import { formatDate, expiryStatus } from './format';
 import { CountedCell, DifferenceCell, ReasonCell } from './cells';
 import * as s from './StocktakeTable.css';
 
@@ -109,7 +109,20 @@ export const columns: ColumnDef<StocktakeLine>[] = [
     header: 'Expiry date',
     accessorFn: (l) => l.expiryDate,
     meta: { width: 115, sortKey: 'expiryDate' },
-    cell: ({ getValue }) => <div className={s.cell}>{formatDate(getValue<string>())}</div>,
+    cell: ({ getValue }) => {
+      const value = getValue<string>();
+      const status = expiryStatus(value);
+      const className = status === 'expired' ? s.expiryExpired : status === 'soon' ? s.expirySoon : s.cell;
+      return (
+        <div
+          className={className}
+          title={status === 'expired' ? 'Expired' : status === 'soon' ? 'Expires soon' : undefined}
+        >
+          {formatDate(value)}
+          {status && <span aria-hidden> ⚠</span>}
+        </div>
+      );
+    },
   },
   {
     id: 'manufactureDate',

@@ -26,9 +26,10 @@ export const vars = createGlobalTheme(':root', {
     focusRing: '#2f6fed',
     rowHover: '#f4f7fb',
     rowSelected: '#e8f0fe',
-    headerBg: '#ffffff',
+    headerBg: '#f7f8fa', // subtle grey header per UI standards (hierarchy)
     diffPositive: '#1b7f3b',
     diffNegative: '#c0392b',
+    warning: '#b45309', // near-expiry amber (>=4.5:1 on white)
     editableBg: '#f0f6ff',
   },
   space: {
@@ -61,7 +62,7 @@ export const vars = createGlobalTheme(':root', {
   },
   size: {
     touch: '48px', // tablet touch target
-    rowHeight: '44px',
+    rowHeight: '48px', // comfortable density (UI standards)
     headerHeight: '48px',
     control: '36px',
   },

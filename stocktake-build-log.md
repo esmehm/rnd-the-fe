@@ -321,3 +321,34 @@ optional bet, not a necessity.
 - Full arrow-key roving-tabindex grid keyboard nav (ARIA roles + resize/sort focus are in; cell-to-cell nav is the remaining WCAG item).
 - Lower-value view polish: **Group by item**, **column reorder**, **persisted table state**, structured list **Filters**, **Print/report**.
 - **Solid arm** (same TanStack Table/Virtual, Kobalte, vanilla-extract) — does dropping the VDOM buy more?
+
+## Visual-parity pass vs old FE + UI standards (2026-07-01)
+
+Compared the screen against the **old FE** (isolated headless Chrome, own temp profile so it never
+touched the shared MCP browser; logged in `check`/`pass`, captured stocktake #433 / 64 lines) and the
+[UI standards](https://msupply-foundation.github.io/ui-standards/). Changes made:
+
+- **Card view was rendering blank on tablet/phone** — the **React Compiler over-memoised the TanStack
+  Virtual list** (cached `getVirtualItems()` on the stable virtualizer ref; never recomputed the range).
+  The desktop table escaped it only because it has other changing state. Fixed with `'use no memo'` in
+  `StocktakeCards.tsx` (TanStack's documented remedy), scoped to the phone-only path so the perf-measured
+  desktop table keeps full compiler optimisation. Cards now use `measureElement` for dynamic height so
+  variance+reason cards don't clip.
+- **Responsive breakpoint** now matches old FE + standards: cards only `<600px` (phones); tablets/desktop
+  use the table (horizontal scroll + pinned Code/Name). Was switching to cards at `≤900px`.
+- **Item name** blue hyperlink → plain charcoal text w/ hover-underline (old FE + standards: names are
+  plain left-aligned text). Still a keyboard-focusable button that opens the edit modal.
+- **Numeric headers right-aligned** (Pack size / Packs snapshot / Packs counted / Difference) — standards'
+  critical rule "right-aligned cells ⇒ right-aligned headers."
+- **Header** subtle grey band (`#f7f8fa`) + charcoal 600 text (hierarchy + 13.8:1 contrast); **row height
+  44→48px** (comfortable density); sort-hover now orange.
+- **Expiry highlighting** near-expiry amber / expired red + ⚠ glyph + `title` (old FE reds; standards:
+  never colour alone). New boundary-tested `expiryStatus()` helper.
+
+**Deliberately NOT matched — header actions.** Old FE uses uniform outlined pills and tucks destructive
+actions inside **More**. Kept the new screen's **semantic buttons** instead: solid orange **Confirm
+finalised** (primary) and solid red **Delete** (destructive). Rationale: colour+text is a stronger,
+more accessible affordance (WCAG "don't rely on colour alone" cuts both ways — a red destructive button
+*adds* a signal), and surfacing Delete beats hiding it in a menu for this task. All buttons already use the
+pill radius, so the shape still reads as the same family. This is an intentional "improvement per the
+standards" rather than strict old-FE parity; revisit if strict parity is preferred.

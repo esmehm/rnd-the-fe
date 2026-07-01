@@ -36,7 +36,9 @@ export function StocktakePage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const stocktakeId = params.stocktakeId ?? DEFAULT_STOCKTAKE_ID;
-  const isNarrow = useMediaQuery('(max-width: 900px)');
+  // Phones (<600px) get the card layout; tablets/desktop use the table with
+  // horizontal scroll + pinned key columns (matches old FE and UI standards).
+  const isNarrow = useMediaQuery('(max-width: 599px)');
 
   const [searchParams, setSearchParams] = useSearchParams();
   const committedFilter = searchParams.get('filter') ?? '';

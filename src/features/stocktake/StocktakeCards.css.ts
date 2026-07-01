@@ -16,11 +16,17 @@ export const scroll = style({
 
 export const viewport = style({ position: 'relative', width: '100%' });
 
-export const card = style({
+// Absolutely-positioned measured wrapper; the bottom padding is the inter-card gap
+// (included in the measured height so dynamic sizing accounts for it).
+export const cardWrap = style({
   position: 'absolute',
   top: 0,
   left: 0,
   width: '100%',
+  paddingBottom: vars.space.sm,
+});
+
+export const card = style({
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.md,
   background: vars.color.surface,
@@ -32,7 +38,7 @@ export const card = style({
 });
 
 export const cardTop = style({ display: 'flex', alignItems: 'flex-start', gap: vars.space.sm });
-export const cardName = style({ flex: 1, minWidth: 0, fontWeight: vars.font.weightMedium, color: vars.color.textLink, cursor: 'pointer' });
+export const cardName = style({ flex: 1, minWidth: 0, fontWeight: vars.font.weightBold, color: vars.color.text, cursor: 'pointer', selectors: { '&:hover': { color: vars.color.primary, textDecoration: 'underline' } } });
 export const cardCode = style({ fontSize: vars.font.sizeSm, color: vars.color.textMuted });
 export const cardMeta = style({ display: 'flex', flexWrap: 'wrap', gap: `${vars.space.xs} ${vars.space.lg}`, fontSize: vars.font.sizeSm, color: vars.color.textMuted });
 

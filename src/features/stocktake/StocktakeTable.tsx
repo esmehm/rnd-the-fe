@@ -99,7 +99,7 @@ export function StocktakeTable({
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 44,
+    estimateSize: () => 48,
     overscan: 12,
   });
 
@@ -166,7 +166,7 @@ export function StocktakeTable({
               <div
                 key={header.id}
                 role="columnheader"
-                className={`${s.headerCell} ${canSort ? s.headerSortable : ''} ${meta?.numeric ? s.cellNumeric : ''}`}
+                className={`${meta?.numeric ? s.headerCellNumeric : s.headerCell} ${canSort ? s.headerSortable : ''}`}
                 onClick={canSort ? () => onToggleSort(meta!.sortKey!) : undefined}
                 aria-sort={isActive ? (sortDesc ? 'descending' : 'ascending') : undefined}
                 style={pinStyle(header.column, true, vars.color.headerBg)}

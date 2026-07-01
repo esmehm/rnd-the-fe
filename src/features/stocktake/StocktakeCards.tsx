@@ -46,6 +46,10 @@ interface Props {
 }
 
 export function StocktakeCards({ lines, reasonOptions, disabled, openEdit, saveCounted, saveReason }: Props) {
+  // TanStack Virtual drives re-renders from its own internal store; the React
+  // Compiler otherwise memoises the getVirtualItems() map on the (stable)
+  // virtualizer ref and never recomputes the range, rendering an empty list.
+  'use no memo';
   const parentRef = useRef<HTMLDivElement>(null);
   const virtualizer = useVirtualizer({
     count: lines.length,
@@ -66,10 +70,12 @@ export function StocktakeCards({ lines, reasonOptions, disabled, openEdit, saveC
           return (
             <div
               key={line.id}
-              className={c.card}
-              role="listitem"
-              style={{ transform: `translateY(${vi.start}px)`, height: vi.size - 8 }}
+              data-index={vi.index}
+              ref={virtualizer.measureElement}
+              className={c.cardWrap}
+              style={{ transform: `translateY(${vi.start}px)` }}
             >
+              <div className={c.card} role="listitem">
               <div className={c.cardTop}>
                 <div className={c.cardName} role="button" tabIndex={0} onClick={() => openEdit(line)} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && openEdit(line)}>
                   {line.itemName}
@@ -118,6 +124,7 @@ export function StocktakeCards({ lines, reasonOptions, disabled, openEdit, saveC
                     </Select>
                   </div>
                 )}
+              </div>
               </div>
             </div>
           );
