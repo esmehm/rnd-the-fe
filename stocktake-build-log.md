@@ -240,9 +240,29 @@ added. Cause: **every cell is now wrapped in an extra `<div role="gridcell" styl
 - **Freeze via sticky needs opaque cell backgrounds** driven by a `--row-bg` var so pinned cells cover
   scrolled content and match selected/hover state.
 
+## Functional-gap closure — CSV export, New-stocktake modes, Other tab (commit range → `93c813f`)
+
+Closed the three biggest functional gaps vs the old FE:
+- **Export CSV** — dependency-free client-side (`csv.ts`); detail exports all 1,506 lines, list exports the page.
+- **New-stocktake modal** — Full (items-with-stock / all-items) · Filtered (by master list) · Blank, with a
+  live "N lines estimated" that counts **stock lines** (`StockLineCount` `hasPacksInStore`) so it matches the
+  backend (verified: full/stock-on-hand → 204 lines created).
+- **Edit-modal "Other" tab** — per-batch **Manufacturer** (from the store's 875 names) + **Comment**, saved via
+  the existing upsert path. (Location/campaign/program skipped — this store has 0 locations configured.)
+
+**Perf guard (6× CPU, prod, 1,506 lines):** data-rendered **912 ms** (was 905), FCP 136 ms, DOM **861**
+(unchanged), code **279 KB** gzip (+19). The features are **on-demand modals/handlers — 0 ms on the table
+load path**, so the ~4× / ~5× win vs the old FE is intact. Verified each in-browser; all test writes to the
+reference stocktake were reverted.
+
+Maintainability notes: reused the one `useSaveStocktakeLines` upsert path (Other tab just adds fields to
+`SaveLineDraft`); CSV is a pure function (no dep); the New-stocktake estimate reuses codegen'd queries. All
+new strings go through i18next where converted.
+
 ## Still to do
 
 - **INP** on cell-edit + scroll (interaction latency) — the other half of the M10 story, both apps.
 - **Full i18n** string extraction (i18next pattern established for key strings) + RTL via CSS logical props.
 - Full arrow-key roving-tabindex grid keyboard nav (ARIA roles + resize/sort focus are in; cell-to-cell nav is the remaining WCAG item).
+- Lower-value view polish: **Group by item**, **column reorder**, **persisted table state**, structured list **Filters**, **Print/report**.
 - **Solid arm** (same TanStack Table/Virtual, Kobalte, vanilla-extract) — does dropping the VDOM buy more?
