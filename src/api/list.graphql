@@ -93,6 +93,21 @@ query ActivityLogs($storeId: String!, $recordId: String!) {
   }
 }
 
+query Manufacturers($storeId: String!) {
+  names(storeId: $storeId, filter: { isManufacturer: true }, page: { first: 1000 }) {
+    ... on NameConnector {
+      __typename
+      totalCount
+      nodes {
+        __typename
+        id
+        name
+        code
+      }
+    }
+  }
+}
+
 query StockLineCount($storeId: String!, $filter: StockLineFilterInput) {
   stockLines(storeId: $storeId, filter: $filter, page: { first: 1 }) {
     ... on StockLineConnector {

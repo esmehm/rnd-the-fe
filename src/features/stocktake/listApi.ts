@@ -127,6 +127,17 @@ export function useItemSearch(search: string, enabled: boolean) {
   });
 }
 
+export type Manufacturer = { id: string; name: string; code: string };
+
+export function useManufacturers(enabled: boolean) {
+  return useQuery({
+    queryKey: ['manufacturers'],
+    enabled,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => (await sdk.Manufacturers({ storeId: STORE_ID })).names.nodes as Manufacturer[],
+  });
+}
+
 export interface SaveLineDraft {
   id?: string; // existing line -> update; absent -> insert
   itemId: string;
@@ -139,6 +150,8 @@ export interface SaveLineDraft {
   costPricePerPack: number | null;
   sellPricePerPack: number | null;
   volumePerPack: number | null;
+  manufacturerId: string | null;
+  comment: string | null;
 }
 
 // Upsert a set of batches for one item: update existing lines, insert new ones.
@@ -162,6 +175,8 @@ export function useSaveStocktakeLines(stocktakeId: string) {
               costPricePerPack: d.costPricePerPack ?? undefined,
               sellPricePerPack: d.sellPricePerPack ?? undefined,
               volumePerPack: d.volumePerPack ?? undefined,
+              manufacturerId: { value: d.manufacturerId },
+              comment: d.comment ?? undefined,
             },
           });
           if (res.updateStocktakeLine.__typename === 'UpdateStocktakeLineError') {
@@ -183,6 +198,8 @@ export function useSaveStocktakeLines(stocktakeId: string) {
               costPricePerPack: d.costPricePerPack ?? undefined,
               sellPricePerPack: d.sellPricePerPack ?? undefined,
               volumePerPack: d.volumePerPack ?? undefined,
+              manufacturerId: d.manufacturerId ?? undefined,
+              comment: d.comment ?? undefined,
             },
           });
           if (res.insertStocktakeLine.__typename === 'InsertStocktakeLineError') {

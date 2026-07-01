@@ -13,7 +13,7 @@ import {
 } from 'react-aria-components';
 import { DateField, toDateValue } from '../../ui/DateField';
 import type { ReasonOption, StocktakeLine } from './api';
-import type { SaveLineDraft } from './listApi';
+import type { SaveLineDraft, Manufacturer } from './listApi';
 import * as ui from '../../ui/uikit.css';
 import * as m from './EditItemModal.css';
 import { vars } from '../../styles/theme.css';
@@ -34,6 +34,8 @@ interface BatchRow {
   cost: string;
   sell: string;
   volume: string;
+  manufacturerId: string | null;
+  comment: string;
 }
 
 const num = (s: string): number | null => {
@@ -58,6 +60,8 @@ function toRow(line: StocktakeLine): BatchRow {
     cost: line.costPricePerPack == null ? '' : String(line.costPricePerPack),
     sell: line.sellPricePerPack == null ? '' : String(line.sellPricePerPack),
     volume: line.volumePerPack == null ? '' : String(line.volumePerPack),
+    manufacturerId: line.manufacturer?.id ?? null,
+    comment: line.comment ?? '',
   };
 }
 
@@ -77,6 +81,8 @@ function blankRow(itemId: string): BatchRow {
     cost: '',
     sell: '',
     volume: '',
+    manufacturerId: null,
+    comment: '',
   };
 }
 
@@ -86,6 +92,7 @@ export function EditItemModal({
   item,
   lines,
   reasonOptions,
+  manufacturers,
   disabled,
   saving,
   onClose,
@@ -96,6 +103,7 @@ export function EditItemModal({
   item: { id: string; code: string; name: string; unitName?: string | null };
   lines: StocktakeLine[];
   reasonOptions: ReasonOption[];
+  manufacturers: Manufacturer[];
   disabled: boolean;
   saving: boolean;
   onClose: () => void;
@@ -128,6 +136,8 @@ export function EditItemModal({
         costPricePerPack: num(r.cost),
         sellPricePerPack: num(r.sell),
         volumePerPack: num(r.volume),
+        manufacturerId: r.manufacturerId,
+        comment: r.comment.trim() || null,
       };
     });
 
@@ -226,7 +236,40 @@ export function EditItemModal({
             )}
 
             {tab === 'other' && (
-              <div className={m.otherNote}>Donor, campaign and program fields are not part of this prototype.</div>
+              <div className={m.gridScroll}>
+                <div className={m.gridHead} style={{ '--batch-cols': '140px 260px 1fr' } as React.CSSProperties}>
+                  <div>Batch</div>
+                  <div>Manufacturer</div>
+                  <div>Comment</div>
+                </div>
+                {rows.map((r) => (
+                  <div key={r.key} className={m.gridRow} style={{ '--batch-cols': '140px 260px 1fr' } as React.CSSProperties}>
+                    <div className={m.snapshotCell} style={{ textAlign: 'left', color: vars.color.text }}>{r.batch || '(no batch)'}</div>
+                    <select
+                      className={m.cellInput}
+                      aria-label="Manufacturer"
+                      value={r.manufacturerId ?? ''}
+                      disabled={disabled}
+                      onChange={(e) => set(r.key, { manufacturerId: e.target.value || null })}
+                    >
+                      <option value="">—</option>
+                      {manufacturers.map((mf) => (
+                        <option key={mf.id} value={mf.id}>
+                          {mf.name}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      className={m.cellInput}
+                      aria-label="Comment"
+                      value={r.comment}
+                      disabled={disabled}
+                      onChange={(e) => set(r.key, { comment: e.target.value })}
+                    />
+                  </div>
+                ))}
+                <div className={m.otherNote}>Donor, campaign, program and location aren’t in this prototype (this store has no locations configured).</div>
+              </div>
             )}
 
             {missingReason && (

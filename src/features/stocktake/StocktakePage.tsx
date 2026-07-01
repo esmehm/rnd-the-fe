@@ -17,6 +17,7 @@ import {
   useSaveStocktakeLines,
   useDeleteStocktakes,
   useActivityLogs,
+  useManufacturers,
   type SaveLineDraft,
 } from './listApi';
 import { StocktakeTable } from './StocktakeTable';
@@ -79,6 +80,7 @@ export function StocktakePage() {
   const saveLines = useSaveStocktakeLines(stocktakeId);
   const deleteStocktake = useDeleteStocktakes();
   const activityLogs = useActivityLogs(stocktakeId, tab === 'log');
+  const manufacturers = useManufacturers(editItemId != null);
 
   const stocktake = stocktakeQuery.data;
   const isFinalised = stocktake?.status === 'FINALISED';
@@ -352,6 +354,7 @@ export function StocktakePage() {
           item={{ id: editItem.id, code: editItem.code, name: editItem.name, unitName: editItem.unitName }}
           lines={editLines}
           reasonOptions={reasonsQuery.data ?? []}
+          manufacturers={manufacturers.data ?? []}
           disabled={disabled}
           saving={saveLines.isPending}
           hasNext={!!nextItemId}

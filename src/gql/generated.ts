@@ -12223,6 +12223,13 @@ export type ActivityLogsQueryVariables = Exact<{
 
 export type ActivityLogsQuery = { __typename?: 'Queries', activityLogs: { __typename: 'ActivityLogConnector', totalCount: number, nodes: Array<{ __typename: 'ActivityLogNode', id: string, type: ActivityLogNodeType, datetime: string, to: string | null, from: string | null, user: { __typename: 'UserNode', username: string } | null }> } };
 
+export type ManufacturersQueryVariables = Exact<{
+  storeId: Scalars['String']['input'];
+}>;
+
+
+export type ManufacturersQuery = { __typename?: 'Queries', names: { __typename: 'NameConnector', totalCount: number, nodes: Array<{ __typename: 'NameNode', id: string, name: string, code: string }> } };
+
 export type StockLineCountQueryVariables = Exact<{
   storeId: Scalars['String']['input'];
   filter?: InputMaybe<StockLineFilterInput>;
@@ -12440,6 +12447,22 @@ export const ActivityLogsDocument = gql`
   }
 }
     `;
+export const ManufacturersDocument = gql`
+    query Manufacturers($storeId: String!) {
+  names(storeId: $storeId, filter: {isManufacturer: true}, page: {first: 1000}) {
+    ... on NameConnector {
+      __typename
+      totalCount
+      nodes {
+        __typename
+        id
+        name
+        code
+      }
+    }
+  }
+}
+    `;
 export const StockLineCountDocument = gql`
     query StockLineCount($storeId: String!, $filter: StockLineFilterInput) {
   stockLines(storeId: $storeId, filter: $filter, page: {first: 1}) {
@@ -12619,6 +12642,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     ActivityLogs(variables: ActivityLogsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<ActivityLogsQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<ActivityLogsQuery>({ document: ActivityLogsDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'ActivityLogs', 'query', variables);
+    },
+    Manufacturers(variables: ManufacturersQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<ManufacturersQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<ManufacturersQuery>({ document: ManufacturersDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'Manufacturers', 'query', variables);
     },
     StockLineCount(variables: StockLineCountQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<StockLineCountQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<StockLineCountQuery>({ document: StockLineCountDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'StockLineCount', 'query', variables);
