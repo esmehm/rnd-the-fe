@@ -19,6 +19,8 @@ import {
   type SaveLineDraft,
 } from './listApi';
 import { StocktakeTable } from './StocktakeTable';
+import { StocktakeCards } from './StocktakeCards';
+import { useMediaQuery } from '../../ui/useMediaQuery';
 import { EditItemModal } from './EditItemModal';
 import { AddItemModal } from './AddItemModal';
 import { MorePanel } from './MorePanel';
@@ -30,6 +32,7 @@ export function StocktakePage() {
   const params = useParams();
   const navigate = useNavigate();
   const stocktakeId = params.stocktakeId ?? DEFAULT_STOCKTAKE_ID;
+  const isNarrow = useMediaQuery('(max-width: 900px)');
 
   const [searchParams, setSearchParams] = useSearchParams();
   const committedFilter = searchParams.get('filter') ?? '';
@@ -252,6 +255,15 @@ export function StocktakePage() {
           <div className={p.tableWrap}>
             {linesQuery.isLoading ? (
               <div className={p.centeredState}>Loading lines…</div>
+            ) : isNarrow ? (
+              <StocktakeCards
+                lines={lines}
+                reasonOptions={reasonsQuery.data ?? []}
+                disabled={disabled}
+                openEdit={(line) => setEditItemId(line.itemId)}
+                saveCounted={saveCounted}
+                saveReason={saveReason}
+              />
             ) : (
               <StocktakeTable
                 lines={lines}
