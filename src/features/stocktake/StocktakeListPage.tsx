@@ -8,6 +8,7 @@ import {
   type ListSortKey,
 } from './listApi';
 import { formatDate } from './format';
+import { toCsv, downloadCsv } from './csv';
 import * as l from './StocktakeListPage.css';
 import * as ui from '../../ui/uikit.css';
 
@@ -79,6 +80,21 @@ export function StocktakeListPage() {
         <div className={l.spacer} />
         <button className={ui.buttonDanger} disabled={!selectedIds.length || del.isPending} onClick={onDelete}>
           {selectedIds.length ? t('common.deleteN', { count: selectedIds.length }) : t('common.delete')}
+        </button>
+        <button
+          className={ui.button}
+          disabled={!rows.length}
+          onClick={() =>
+            downloadCsv(
+              'stocktakes.csv',
+              toCsv(
+                ['Number', 'Status', 'Description', 'Created', 'Lines'],
+                rows.map((r) => [r.stocktakeNumber, r.status, r.description, formatDate(r.createdDatetime), r.lines.totalCount]),
+              ),
+            )
+          }
+        >
+          {t('stocktakes.exportCsv')}
         </button>
         <button className={ui.buttonPrimary} disabled={insert.isPending} onClick={onNew}>
           {t('stocktakes.new')}

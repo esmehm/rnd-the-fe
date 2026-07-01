@@ -13,6 +13,7 @@ const en = {
 
     'stocktakes.title': 'Stocktakes',
     'stocktakes.new': '+ New stocktake',
+    'stocktakes.exportCsv': 'Export CSV',
     'stocktakes.filter': 'Filter by description…',
     'stocktakes.count_one': '{{count}} stocktake',
     'stocktakes.count_other': '{{count}} stocktakes',
@@ -27,6 +28,7 @@ const en = {
     'stocktake.onHold': 'On hold',
     'stocktake.confirmFinalised': 'Confirm finalised',
     'stocktake.more': 'More',
+    'stocktake.exportCsv': 'Export CSV',
     'stocktake.description': 'Description',
     'stocktake.descriptionPlaceholder': 'Add a description…',
     'stocktake.filterItems': 'Filter items by code or name…',

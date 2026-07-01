@@ -25,7 +25,8 @@ import { useMediaQuery } from '../../ui/useMediaQuery';
 import { EditItemModal } from './EditItemModal';
 import { AddItemModal } from './AddItemModal';
 import { MorePanel } from './MorePanel';
-import { formatDate } from './format';
+import { formatDate, difference } from './format';
+import { toCsv, downloadCsv } from './csv';
 import * as p from './StocktakePage.css';
 import * as ui from '../../ui/uikit.css';
 
@@ -132,6 +133,16 @@ export function StocktakePage() {
     );
   };
 
+  const onExportCsv = () => {
+    const headers = ['Code', 'Name', 'Batch', 'Expiry', 'Manufacture', 'Location', 'Unit', 'Pack size', 'Packs snapshot', 'Packs counted', 'Difference', 'Reason', 'Manufacturer', 'Comment'];
+    const rows = lines.map((l) => [
+      l.item.code, l.itemName, l.batch, formatDate(l.expiryDate), formatDate(l.manufactureDate),
+      l.location?.name, l.item.unitName, l.packSize, l.snapshotNumberOfPacks, l.countedNumberOfPacks,
+      difference(l), l.reasonOption?.reason, l.manufacturer?.name, l.comment,
+    ]);
+    downloadCsv(`stocktake-${stocktake?.stocktakeNumber ?? stocktakeId}.csv`, toCsv(headers, rows));
+  };
+
   const selectedIds = Object.keys(rowSelection).filter((k) => rowSelection[k]);
   const onDeleteSelected = () => {
     if (!selectedIds.length) return;
@@ -199,6 +210,9 @@ export function StocktakePage() {
         </button>
         <button className={ui.buttonPrimary} disabled={isFinalised || updateStocktake.isPending} onClick={confirmFinalised}>
           {t('stocktake.confirmFinalised')}
+        </button>
+        <button className={ui.button} onClick={onExportCsv} disabled={!lines.length}>
+          {t('stocktake.exportCsv')}
         </button>
         <button className={ui.button} onClick={() => setMoreOpen(true)} disabled={!stocktake}>
           {t('stocktake.more')}
