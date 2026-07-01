@@ -164,7 +164,8 @@ MUI/MRT app get measured against. (To serve the prod build for measurement: `npm
 
 Same stocktake (#112, 1,506 lines, CHC Ermera), same `:8000` backend, both prod builds served via
 `serve-prod.mjs` (gzip + `/graphql` proxy), 5 runs each (warm-up dropped), measured via Playwright CDP.
-**Old FE baseline commit: `22cdf6eeb6`** (open-msupply-duo, v3.0.0-RC, built `packages/host/dist`).
+**Commits measured:** old FE `22cdf6eeb6` (open-msupply-duo, v3.0.0-RC, built `packages/host/dist`);
+Thin React `be835eb` (this repo, branch `thin-react-stocktake-bakeoff`, prod `rspack build`).
 **Both virtualise the full set** (old FE MRT renders 13 rows in DOM, Thin React 27) — no pagination on
 either detail view, so it's apples-to-apples on the dataset.
 

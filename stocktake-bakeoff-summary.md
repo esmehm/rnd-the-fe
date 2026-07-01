@@ -58,8 +58,9 @@ apples-to-apples on the dataset.
 | GraphQL calls on load | 14 | **3** | ~4.7× fewer |
 | HTTP requests | 37 | **7** | ~5× fewer |
 
-**Baseline measured:** old FE = open-msupply-duo **commit `22cdf6eeb6`** (v3.0.0-RC),
-built `client/packages/host/dist`. Thin React = this repo (`main`, prod `rspack build`).
+**Baselines measured:**
+- Old FE = open-msupply-duo **commit `22cdf6eeb6`** (v3.0.0-RC), built `client/packages/host/dist`.
+- Thin React = this repo **commit `be835eb`** (branch `thin-react-stocktake-bakeoff`), prod `rspack build`.
 
 ### How to read it
 - The **8× FCP gap** is the emotion runtime-style-injection + bundle-parse tax the RnD doc predicted.
