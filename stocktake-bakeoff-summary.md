@@ -131,11 +131,38 @@ targets, <900px), and **i18next** (English bundle; key strings converted).
 All the parity features cost **+17 KB gzip** and kept data-render flat (~905 ms). DOM rose to 860
 (per-cell freeze/ARIA wrappers) — still below the old FE. **The ~4× / ~5× win survived the build-out.**
 
-## Next steps
+Then the three biggest *functional* gaps were closed too — **CSV export**, the **full/filtered/blank
+New-stocktake modal** (live stock-line estimate), and the **edit-modal "Other" tab** (per-batch
+manufacturer + comment). These are on-demand modals/handlers, so the re-measure was **912 ms data-render,
+861 DOM, 279 KB gzip (+19)** — no change to the table load path. Win intact.
 
-1. **INP** probe (event-timing + scripted cell-edit/scroll) on both apps — completes the M10 picture.
-2. Finish the deep items: **full arrow-key grid keyboard nav** (React Aria useGrid), **full i18n
-   extraction** + RTL (CSS logical properties).
-3. **Solid arm** (same TanStack Table/Virtual, Kobalte, vanilla-extract) — does dropping the VDOM buy
-   more on top of the 4×?
-4. Optional **Slow 4G** network throttle to model remote-site cold loads.
+## Coverage vs the original brief
+
+| Brief item | Status |
+|---|---|
+| Andrei's stocktake steps (table · codegen · filter · **URL filter** · row-select+delete · **edit modal** · **live update**) | ✅ 7/7 |
+| Greenfield stocktake, importing nothing from the current app (§8) | ✅ |
+| Bake-off vs current app under **6× CPU** (§8) | ✅ (~4× faster, ~5.6× smaller) |
+| §8 metrics: LCP · bundle-per-route | ✅ |
+| §8 metric: **rows-before-jank** | 🟡 all 1,506 virtualised w/ no jank; didn't push to 10k/100k |
+| §8 metric: **INP** (cell-edit, scroll) | ❌ not measured |
+| §8: **slow network** throttle | ❌ CPU-only |
+| §8: **Solid arm** (3rd implementation) | ❌ not built (evidence-driven optional) |
+| Stack: vanilla-extract · React Aria · TanStack Table/Virtual · Rspack · React 19+Compiler · codegen | ✅ |
+| §9: tables large/editable/frozen/sort/filter/paginate · cards/48px · themes · datepicker · GraphQL cache | ✅ |
+| §9: keyboard grid nav · i18n · navigation | 🟡 partial (roles only · key strings, no RTL · no code-splitting) |
+| §9: Command-K · Module Federation plugins · JSONForms | ❌ (separate concerns) |
+| §7: end-to-end types · golden-path `CLAUDE.md` | ✅ |
+| §7/§11: **perf budgets that fail CI** · lint invariants | ❌ measured but not gating |
+
+**Bottom line:** the core research question is answered with evidence and the screen is built to strong
+parity. The gaps that matter most *against the brief's own emphasis* are **INP**, a **CI perf-budget gate**,
+and the **Solid arm**.
+
+## Next steps (priority order)
+
+1. **INP** probe (event-timing + scripted cell-edit/scroll) on both apps — the one named metric still missing.
+2. **CI perf-budget gate** — break the build on bundle-per-route + INP/network-quiet regressions (§7's
+   "design pattern that stops perf regressing").
+3. **Solid arm** — does dropping the VDOM buy more on top of the ~4×?
+4. Lower value: full grid keyboard nav (WCAG), i18n RTL + full extraction, route code-splitting, Slow-4G run.

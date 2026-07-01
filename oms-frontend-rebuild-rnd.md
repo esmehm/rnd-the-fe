@@ -215,8 +215,28 @@ Measure all three identically and put it on one slide:
 
 ## 11. Open questions / next steps
 
-- [ ] Confirm zero-runtime CSS choice (vanilla-extract vs Panda vs CSS Modules) — token ergonomics for designers.
-- [ ] Confirm headless lib (React Aria vs Ark UI) — evaluate grid/date a11y coverage.
-- [ ] Stand up the **bake-off harness** (throttled-profile measurement + greenfield **stocktake** on TanStack Table + Virtual + zero-runtime CSS).
-- [ ] Decide on Rspack bundler swap (independent, low-risk, keeps Module Federation).
-- [ ] Define the CI perf budgets (bundle-per-route, INP on throttled profile).
+- [x] Confirm zero-runtime CSS choice → **vanilla-extract** (typed token contract → CSS vars; built).
+- [x] Confirm headless lib → **React Aria** (grid a11y + DatePicker; built. Solid arm would use Kobalte).
+- [x] Stand up the **bake-off harness** → built: `.claude/skills/perf-measure` + a Playwright-CDP 6× throttle runner; greenfield **stocktake** built on TanStack Table + Virtual + vanilla-extract.
+- [x] Decide on **Rspack** bundler swap → scaffolded on Rspack (React 19 + Compiler, keeps the Module Federation path).
+- [ ] Define the **CI perf budgets** (bundle-per-route, INP on throttled profile) — metrics exist via the harness; **not yet gating the build**. Still open.
+
+## 12. Outcome (RnD day) — bake-off ran, thesis confirmed
+
+Built the greenfield stocktake and measured it against the current MUI/MRT app under 6× CPU (M10 proxy),
+prod builds, same backend/store/stocktake (#112, 1,506 lines). **Thin React was ~4.1× faster to data-rendered
+(911 → measured vs 3,781 ms), ~8× faster FCP, ~5.6× smaller code (243 KB vs 1,362 KB gzip), 496 vs 1,363 DOM
+nodes** — with the VDOM still present. **Conclusion: most of the slowness was the libraries (MUI/emotion/MRT),
+not React's renderer** → the framework swap is separable/optional, exactly as §3 argued.
+
+Also built to parity: stocktakes list, status workflow, multi-batch edit modal, More/Log, table power
+features (show/hide, resize, freeze, fullscreen, ARIA grid), responsive card view, i18next (key strings),
+CSV export, and the full/filtered/blank New-stocktake modal.
+
+- Full write-up + coverage scorecard: [stocktake-bakeoff-summary.md](stocktake-bakeoff-summary.md)
+- Chronological build log + gotchas: [stocktake-build-log.md](stocktake-build-log.md)
+- Raw measured rows: [docs/perf/frontend-runs.html](docs/perf/frontend-runs.html)
+
+**Gaps vs this brief still open:** (1) **INP** (named metric — cell-edit/scroll) not yet measured; (2) **CI
+perf-budget gate** (§7's "stops perf regressing" pattern); (3) the **Solid arm** (§8's evidence-driven optional
+third implementation). Lower-value: full grid keyboard nav, RTL, code-splitting, Command-K.
