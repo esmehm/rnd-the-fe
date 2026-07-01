@@ -70,6 +70,8 @@ An external dev built an alternate frontend in plain JS, no React. Two separable
 
 **Verdict: right diagnosis, wrong prescription.** The win without the DX regression comes from a **compiler / fine-grained-reactive framework** (Solid, Svelte 5) that compiles the overhead away — not from hand-rolled vanilla that a team has to maintain with AI assistance.
 
+> **Update (post-bake-off):** the bake-off then showed the *libraries* were the dominant tax, not React's runtime — so we captured the drastic win by **keeping React + TypeScript** and dropping MUI/emotion/MRT, and a fine-grained-reactive swap stays an *optional, later* bet (§12). The pure-JS demo proved the ceiling; this proved we don't have to pay its DX / type-safety / AI-familiarity cost to get most of the way there.
+
 ---
 
 ## 5. Option spectrum (conservative → out-there)
@@ -98,9 +100,9 @@ An external dev built an alternate frontend in plain JS, no React. Two separable
 
 It exists to answer one research question:
 
-> **How much of OMS's slowness is the renderer (React's VDOM) vs. the libraries we layered on top (MUI/emotion/MRT)?**
+> **Can we drastically improve performance *without* leaving React + TypeScript?** (A pure-JS prototype already showed the ceiling is high — but it dropped React *and* type-safety to get there. Mechanistically: how much of the slowness is the renderer (React's VDOM) vs. the libraries we layered on top (MUI/emotion/MRT)?)
 
-That makes it the **control arm** of the bake-off (§8): build the screen greenfield on this stack, build it again on Solid, and let the numbers say whether the framework was ever the bottleneck. Keeping React is a **deliberate, defended** stack choice — the JSONForms React binding, the Module Federation plugin system, and team + AI fluency all survive — not a failure to commit to the rebuild.
+That makes it the **control arm** of the bake-off (§8): build the screen greenfield on this stack, build it again on Solid, and let the numbers say whether the framework was ever the bottleneck. Keeping React is a **deliberate, defended** stack choice — the JSONForms React binding, the Module Federation plugin system, and team + AI fluency (and richer AI training data) all survive — not a failure to commit to the rebuild. It also keeps the "drop React?" decision **separate and deferrable**: prove the low-risk win first, decide on the renderer swap later, on evidence.
 
 > **Why this is in-scope for RnD day.** The brief rules out *improving the current frontend* (small fixes). This isn't that: removing MUI/emotion/MRT and rebuilding the view layer on a *compiled* styling model and a *headless/virtualised* table is a **major structural restructure** — it shares the word "React" with the old app and almost nothing else in the view layer. It is **prototyped from scratch, not migrated.** (How we'd eventually roll it across the real codebase is in §10 — explicitly *not* part of the day.)
 
@@ -224,10 +226,13 @@ Measure all three identically and put it on one slide:
 ## 12. Outcome (RnD day) — bake-off ran, thesis confirmed
 
 Built the greenfield stocktake and measured it against the current MUI/MRT app under 6× CPU (M10 proxy),
-prod builds, same backend/store/stocktake (#112, 1,506 lines). **Thin React was ~4.1× faster to data-rendered
-(911 → measured vs 3,781 ms), ~8× faster FCP, ~5.6× smaller code (243 KB vs 1,362 KB gzip), 496 vs 1,363 DOM
-nodes** — with the VDOM still present. **Conclusion: most of the slowness was the libraries (MUI/emotion/MRT),
-not React's renderer** → the framework swap is separable/optional, exactly as §3 argued.
+prod builds, same backend/store/stocktake (#112, 1,506 lines). **We got the drastic win *without leaving
+React + TypeScript*: ~4.1× faster to data-rendered (911 vs 3,781 ms), ~8× faster FCP, ~5.6× smaller code
+(243 KB vs 1,362 KB gzip), 496 vs 1,363 DOM nodes** — with the VDOM still present. So the low-risk path
+(keep React + TS, drop the libraries) captures most of what the pure-JS demo showed, while preserving dev +
+AI familiarity. **Supporting finding: most of the slowness was the libraries (MUI/emotion/MRT), not React's
+renderer** → the framework swap is separable/optional and can be a later, evidence-based decision, exactly
+as §3 argued.
 
 Also built to parity: stocktakes list, status workflow, multi-batch edit modal, More/Log, table power
 features (show/hide, resize, freeze, fullscreen, ARIA grid), responsive card view, i18next (key strings),

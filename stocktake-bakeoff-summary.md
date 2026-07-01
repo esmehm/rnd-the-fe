@@ -10,12 +10,18 @@ against the current MUI/MRT app on a simulated Lenovo M10. Companion docs:
 
 ## The question we set out to answer
 
-> How much of OMS's slowness is **React's VDOM** vs the **libraries layered on top** (MUI / emotion
-> runtime CSS-in-JS / Material React Table)?
+A pure-JS prototype already showed the performance ceiling is high — but it dropped React *and*
+type-safety to get there. So the real question was:
 
-Answer, measured: **the libraries, overwhelmingly.** Keeping React but replacing MUI/emotion/MRT with
-a headless + zero-runtime-CSS + virtualised stack made the same screen **~4× faster to usable** and
-**~5.6× smaller**, with the VDOM still in place.
+> **Can we drastically improve performance *without* leaving React + TypeScript?** — keeping dev + AI
+> familiarity (training data, hireable skills) and lower rewrite risk, and leaving any "drop React" call
+> for a later, evidence-based decision. (Mechanistically: how much of the slowness is **React's VDOM** vs
+> the **libraries layered on top** — MUI / emotion runtime CSS-in-JS / Material React Table?)
+
+Answer, measured: **yes — and it's the libraries, overwhelmingly, not the renderer.** Keeping React 19 +
+TypeScript but replacing MUI/emotion/MRT with a headless + zero-runtime-CSS + virtualised stack made the
+same screen **~4× faster to usable** and **~5.6× smaller**, with the VDOM still in place — so the
+framework swap becomes an optional, later bet rather than the premise.
 
 ## What we built (from an empty folder)
 

@@ -1,8 +1,12 @@
 # CLAUDE.md — Thin React stocktake (bake-off control arm)
 
-Greenfield rebuild of the OMS **stocktake detail** screen. Purpose: isolate how much of OMS's
-slowness is React's VDOM vs the MUI/emotion/MRT libraries on top. Keep this codebase **lean and
-consistent** — it's also a test of whether AI + humans can extend a golden-path stack reliably.
+Greenfield rebuild of the OMS **stocktake detail** screen. Purpose: prove we can **drastically improve
+performance without leaving React + TypeScript** — a pure-JS prototype already showed the ceiling, but at
+the cost of React and type-safety; this asks whether we can capture most of that win while keeping dev +
+AI familiarity and lower rewrite risk, leaving any "drop React" call for a separate, later, evidence-based
+decision. (Mechanistically that means isolating how much of the slowness is React's VDOM vs the
+MUI/emotion/MRT libraries on top.) Keep this codebase **lean and consistent** — it's also a test of whether
+AI + humans can extend a golden-path stack reliably.
 Full context: [oms-frontend-rebuild-rnd.md](oms-frontend-rebuild-rnd.md) · running log:
 [stocktake-build-log.md](stocktake-build-log.md).
 

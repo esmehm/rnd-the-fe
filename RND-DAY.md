@@ -13,8 +13,10 @@ A rewrite is being proposed to fix performance on the low-spec tablets (Lenovo M
 end-client hands. I picked **two things worth de-risking before anyone commits**, because
 they're the two ways a rewrite goes wrong:
 
-1. **Is the performance win real, and where does it actually come from?** — worth building
-   the wrong thing only if we're sure it's faster, and sure *what* made it faster.
+1. **Can we get the performance win *without leaving React/TypeScript*?** — a pure-JS demo already
+   showed the ceiling is high; the useful question is whether we can capture most of it while keeping
+   React + TS (dev + AI familiarity, lower risk), and *where* the win comes from — so "drop React" stays
+   a later, evidence-based call rather than the premise of the rewrite.
 2. **Can we prove functional parity without hand-QA'ing everything twice?** — a rewrite is
    only safe if we can show the new app does what the old one did. That needs automated
    tests that **survive the rewrite** and can run against **both** front ends.
@@ -33,8 +35,16 @@ rationale) · [stocktake-bakeoff-summary.md](stocktake-bakeoff-summary.md) (resu
 
 ### The research question
 
-> How much of OMS's slowness is **React's VDOM** vs the **libraries layered on top**
-> (MUI / emotion runtime CSS-in-JS / Material React Table)?
+A pure-JS prototype already showed the raw performance ceiling is high — but it got there by dropping
+React *and* type-safety. So the question I actually wanted answered was:
+
+> **Can we drastically improve performance *without* leaving React + TypeScript?**
+
+Keeping them preserves dev + AI familiarity (training data, hireable skills, our JSONForms / MUI /
+Module-Federation ecosystem) and reduces rewrite risk, and it lets "do we drop React?" be a *separate,
+later, evidence-based* decision rather than the premise. Mechanistically that's the same as asking how
+much of the slowness is **React's VDOM** vs the **libraries layered on top** (MUI / emotion / MRT) — which
+the bake-off answers directly.
 
 ### What I built
 
@@ -65,10 +75,12 @@ a modal round-trip). Never worse; 6–11× better on the heavy ones.
 
 ### The answer
 
-**It's the libraries, overwhelmingly — not React's renderer.** The ~4× / ~5.6× win holds
-**with the VDOM still in place**. That reframes the scary part (swap React for Solid/Svelte)
-from *mandatory* to *an optional extra bet* — the high-leverage work (drop emotion/MUI/MRT,
-virtualise, zero-runtime CSS) is framework-independent and is where the win lives.
+**Yes — and we don't have to leave React to get it.** Keeping React 19 + TypeScript and swapping only the
+libraries (headless behaviour + zero-runtime CSS + a virtualised table) made the same screen **~4× faster
+and ~5.6× smaller**. Because that win holds **with the VDOM still in place**, the slowness was
+overwhelmingly the **libraries, not React's renderer** — so the scary part (swap React for Solid/Svelte)
+drops from *mandatory* to an *optional, later* bet. We take the low-risk win now, keep the DX and
+AI-familiarity, and still have headroom if we ever decide the renderer swap is worth it.
 
 ---
 
@@ -154,7 +166,7 @@ tagged tests against each prototype and see which pass unchanged. This is the br
 ## Status at a glance
 
 **Done ✅**
-- Thin React bake-off: ~4× faster, ~5.6× smaller, INP 6–11× — measured, prod, reproducible.
+- Thin React bake-off: ~4× faster, ~5.6× smaller, INP 6–11× — **with React + TS kept**; measured, prod, reproducible.
 - Behaviour-ID single source of truth + CI guard; parity + testing strategy docs.
 - Deterministic distribution suite (behaviour-anchored) + runnable exploratory stocktake.
 
@@ -175,11 +187,13 @@ tagged tests against each prototype and see which pass unchanged. This is the br
 
 1. **The problem (1 slide).** Old tablets, near-unusable, rewrite proposed. Two ways a rewrite
    fails: it's not actually faster, or you can't prove it still works. → my two strands.
-2. **Strand A — where's the slowness? (2–3 slides).** The question (VDOM vs libraries). The
-   control-arm setup (keep React, rip out MUI/emotion/MRT). **The headline table.** The INP
-   head-to-head (11× on opening the edit modal is the visceral one). *Answer: it's the libraries.*
-3. **Reframe (1 slide).** So the mandatory, high-leverage work is framework-independent; the
-   React→Solid swap is now an optional bet, not the premise. De-risks the whole proposal.
+2. **Strand A — can we win *without leaving React/TS*? (2–3 slides).** The question (a pure-JS demo
+   already proved the ceiling — can we keep React + TS and still win?). The control-arm setup (keep
+   React, rip out MUI/emotion/MRT). **The headline table.** The INP head-to-head (11× on opening the
+   edit modal is the visceral one). *Answer: yes — and it's the libraries, not the renderer.*
+3. **Reframe (1 slide).** We hit the target **without leaving React/TypeScript** — the mandatory,
+   high-leverage work is framework-independent, so the React→Solid swap is now an optional, later bet,
+   not the premise. Keeps dev + AI familiarity and de-risks the whole proposal.
 4. **Strand B — proving parity (2–3 slides).** Behaviour IDs as one source of truth → both a
    deterministic suite and an AI exploratory agent anchor to them. **The parity matrix** (old ×
    new). The portability finding (~98% semantic → survives a rewrite if the DOM stays queryable).
