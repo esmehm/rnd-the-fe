@@ -40,9 +40,11 @@ React *and* type-safety. So the question I actually wanted answered was:
 
 > **Can we drastically improve performance *without* leaving React + TypeScript?**
 
-Keeping them preserves dev + AI familiarity (training data, hireable skills, our JSONForms / MUI /
-Module-Federation ecosystem) and reduces rewrite risk, and it lets "do we drop React?" be a *separate,
-later, evidence-based* decision rather than the premise. Mechanistically that's the same as asking how
+Keeping them preserves dev + AI familiarity (training data, hireable skills) and the ecosystem pieces we
+*keep* — **JSONForms' React-only binding, Module Federation plugins, the TanStack data layer** — and
+reduces rewrite risk, and it lets "do we drop React?" be a *separate, later, evidence-based* decision
+rather than the premise. (MUI/MRT are React-only too, but we're dropping them regardless, so they're not a
+reason to stay — JSONForms is.) Mechanistically that's the same as asking how
 much of the slowness is **React's VDOM** vs the **libraries layered on top** (MUI / emotion / MRT) — which
 the bake-off answers directly.
 

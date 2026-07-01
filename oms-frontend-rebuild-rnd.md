@@ -64,7 +64,7 @@ Removing emotion/MUI runtime styling is unavoidable to hit the perf goal — and
 An external dev built an alternate frontend in plain JS, no React. Two separable issues:
 
 - **"We'd lose type safety"** is *not* a property of dropping React. Solid, Svelte 5, Vue, Preact, Lit are all first-class TypeScript. The prototype lost types by *choice*, not necessity. Valid criticism of that prototype; not of the category.
-- **"React is what devs/AI know"** is real — most training data, most hireable skills, and our whole ecosystem (MRT, JSONForms, MUI, Module Federation) assumes it.
+- **"React is what devs/AI know"** is real — most training data, most hireable skills, and the ecosystem pieces we're *keeping* (JSONForms' React binding, Module Federation plugins, the TanStack data layer) assume it. (MUI/MRT assume React too, but we're dropping them regardless — so they're not a reason to stay on React; JSONForms is.)
 
 **Steelman:** they correctly diagnosed that **React's runtime is a genuine CPU tax** on the M10's WebView (reconciliation, cascading re-renders, VDOM diff are pure overhead). They just reached for the most extreme cure and threw away types, the component model, and AI-fluency with it.
 
