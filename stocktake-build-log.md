@@ -296,6 +296,12 @@ Event Timing, discarded warm-up, 2 runs.
 | **Open edit modal** (warmed) | **104 ms** | **1,144 ms** | **~11×** |
 | Scroll worst frame | 13–35 ms | 12 ms (both 0 long >50 ms frames) | ~comparable |
 
+**"Cell-edit" is "—" for the old FE because it has *no inline editable cell*** — the Packs-counted cell is
+read-only text (`<p>345</p>`); clicking it opens the edit modal (verified: click/dbl-click adds no cell input;
+focus lands on a *modal* field). So the real "adjust one count" task is: **Thin React ~40–88 ms inline** vs
+**old FE ~1,144 ms (open the modal) + type** — Thin React's inline editing replaces a ~1.1 s modal round-trip.
+That's arguably the sharpest UX win, not a missing data point.
+
 **Read:** in a clean context, every Thin React interaction is fast (≤ ~104 ms). The two heavy interactions are
 where MUI/emotion/MRT hurt most: **row-select ~6×** (re-rendering the visible window) and **opening the edit
 modal ~11×** (1.14 s to mount the MUI dialog — item combobox + tabs + sub-grid of selects — vs React Aria's
