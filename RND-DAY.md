@@ -141,7 +141,8 @@ tagged tests against each prototype and see which pass unchanged. This is the br
 | Deterministic **distribution** suite (behaviour-anchored) | open-msupply `distribution-regresstion-test` | ✅ 31 tests, `covers` + json reporter; being made green again |
 | Deterministic **stocktake** suite (the chosen PoC page) | open-msupply-uno (WIP) | 🟡 21 tests, ~30 INV-03/04 + SMV-01 behaviour IDs |
 | Runnable **exploratory** stocktake + setup workflows | tmf-testing PR #10 | ✅ anchored to behaviour IDs |
-| Same tests run on **new FE** → build the matrix | this repo (Thin React) | ⬜ next — needs testid/role parity check |
+| **Exploratory agent** run against the **new FE** | this repo @ `11bc72d` | ✅ full workflow walked (~24 behaviours, ~26 min); **5 findings incl. 1 HIGH** data-integrity (Add-item double-count) |
+| **Deterministic** tests run on **new FE** → build the matrix | this repo (Thin React) | ⬜ next — needs testid/role parity check |
 
 ---
 
@@ -171,6 +172,8 @@ tagged tests against each prototype and see which pass unchanged. This is the br
 - Thin React bake-off: ~4× faster, ~5.6× smaller, INP 6–11× — **with React + TS kept**; measured, prod, reproducible.
 - Behaviour-ID single source of truth + CI guard; parity + testing strategy docs.
 - Deterministic distribution suite (behaviour-anchored) + runnable exploratory stocktake.
+- **Exploratory agent run against the rewrite (`11bc72d`)** — walked the full stocktake workflow and found a
+  **HIGH data-integrity bug** (Add-item double-count) + 4 more in ~26 min, each anchored to a behaviour ID.
 
 **In progress 🟡**
 - Stocktake deterministic suite (open-msupply-uno) — 21 tests wired to behaviour IDs.
@@ -199,6 +202,9 @@ tagged tests against each prototype and see which pass unchanged. This is the br
 4. **Strand B — proving parity (2–3 slides).** Behaviour IDs as one source of truth → both a
    deterministic suite and an AI exploratory agent anchor to them. **The parity matrix** (old ×
    new). The portability finding (~98% semantic → survives a rewrite if the DOM stays queryable).
+   *Proof it bites:* the exploratory agent, pointed at the rewrite, found a **HIGH data-integrity bug
+   (Add-item double-count) + 4 more in ~26 min**, DB-verified — the strand catches *real* new bugs, not
+   just replays known ones.
 5. **The join (1 slide).** The diagram above — measure the win, prove parity, and the bake-off
    *is* the portability check. Stocktake is the shared proof page.
 6. **Status + asks (1 slide).** What's done / in-progress / next. Open decisions that need the

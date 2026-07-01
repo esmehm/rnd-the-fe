@@ -153,6 +153,44 @@ TanStack Virtual list; `'use no memo'` on the phone-only cards restores it while
 full compiler optimisation. Re-measure (commit `11bc72d`): **~730 ms data-render, 894 DOM, CLS 0** — table
 load path unchanged. Win intact.
 
+## Exploratory testing vs the new build — how effective was it?
+
+The other RnD strand is a **behaviour-anchored exploratory AI agent** (Opus 4.8, driving the UI via
+Playwright, anchored to the INV-03/04 + SMV-01 behaviour IDs). We pointed it at **this build (commit
+`11bc72d`)** as the first real test of "does exploratory testing catch bugs a rewrite introduces?" It
+walked the **full stocktake workflow** (all 4 sections, ~24 behaviour IDs) in **~26 min** — and it was
+**very effective**.
+
+**Bugs it found in the rewrite (5):**
+
+| # | Severity | Finding |
+|---|---|---|
+| 1 | **HIGH** (data integrity) | **Add-item double-count.** "+ Add item" creates a snapshot-0, no-batch line; finalising an item that *already* has stock posts a **new** stock line on top of the existing one. Repro'd + **DB-verified**: 500 in stock, counted 450, finalised as **950** (2 stock lines + an INVENTORY_ADDITION invoice). Silent stock corruption; non-blocking. |
+| 2 | MEDIUM-HIGH (validation / error UX) | **Blank pack-size + leaked error.** A counted variance line saves with Pack size blank; finalise then fails and dumps the raw GraphQL `PackSizeBelowOne` error object (mutation text and all) into the UI. No client-side validation; raw internal error surfaced. (Rollback was atomic — clean.) |
+| 3 | LOW | New stocktakes get **no default description** (INV-03.9 expects "Created by &lt;user&gt; on &lt;date&gt;"). |
+| 4 | LOW | **Log tab** shows a raw JSON diff and no user attribution (INV-03.40). |
+| 5 | LOW | Transient **GraphQL 408s** (likely dev-server/HMR flakiness, not a product defect). |
+
+It also **confirmed ~24 behaviours pass** (all creation modes, snapshot == real SOH at open, reason lists
+direction-filtered + OK-gated, atomic finalise, ledger correct **both directions**, full post-finalise
+edit-protection, no blank-item-name write bug), and proposed **5 new "gap" behaviours** where a probe
+mapped to no existing ID — including the exact hole behind Finding 1 ("Add-item must load the item's
+existing batches with real snapshots").
+
+**Effectiveness read:**
+- The headline is **Finding 1**: a **data-integrity** defect that silently doubles stock — the class of
+  bug perf metrics, type-checks and load tests never see — caught in ~26 min and **verified against the
+  database**, not just the UI.
+- Every finding is **anchored to a behaviour ID or proposes one**, so it feeds straight back into the
+  regression suite / parity matrix rather than being a throwaway note.
+- **Contrast with the old FE:** the *same* workflow run against v3 (`22cdf6eeb6`) was **blocked at "open a
+  stocktake"** (0/4 sections reached, navigation defects) — so this run both found rewrite-specific bugs
+  *and* confirmed the rewrite unblocks the workflow the old run couldn't complete. *(That v3 run had
+  concurrent-session contamination; treat the contrast as directional.)*
+
+**These are open bugs in the Thin React prototype** — Findings 1 & 2 in particular should be fixed before
+it's parity-complete. Full run: `tmf-testing` → `projects/oms/core/exploratory/runs/stocktake-findings-fe-rewrite-11bc72d.md`.
+
 ## Coverage vs the original brief
 
 | Brief item | Status |
