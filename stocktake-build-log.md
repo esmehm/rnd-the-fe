@@ -280,9 +280,28 @@ reconciliation) — and it's comfortably acceptable, i.e. **evidence that the re
 bottleneck for these interactions**, so the Solid arm stays an optional bet rather than a necessity.
 Not yet done: the **old-FE INP** for a head-to-head (needs driving its authed screen).
 
+### Old-FE INP (partial, contended)
+
+Attempted the head-to-head, but the shared Playwright browser was in use by another session and the old FE's
+authed screen kept dropping to `/login` (and is slow: ~4 s / 14 GraphQL calls). Deliberately **did not log in
+/ switch store on the shared context** (it would change the other session's store mid-task). One clean run
+landed before auth dropped:
+
+| Interaction (6× CPU) | Thin React | Old FE |
+|---|---|---|
+| First interaction (warm-up) | 144 ms | **888 ms** (~6×) |
+| **Sort** (header click) | 184–256 ms | **752 ms** (~3×) |
+| Open edit modal | 296 ms | not captured |
+| Row-select | 200 ms | not captured |
+| Scroll worst frame | 13 ms | 15 ms (comparable — both virtualise) |
+
+**Directional read:** old-FE interactions are ~3× heavier under throttle (the one clean point, sort, + the
+first-interaction cost), consistent with the load bake-off; scroll is comparable. Not a full set — redo when
+the shared browser is free (or in a dedicated browser / with fresh login) to complete open-modal + row-select.
+
 ## Still to do
 
-- **Old-FE INP** for the head-to-head (Thin React INP is measured; the current app's isn't yet).
+- **Complete old-FE INP** (open-modal + row-select) for a full head-to-head — needs a free browser + fresh old-FE login.
 - **Full i18n** string extraction (i18next pattern established for key strings) + RTL via CSS logical props.
 - Full arrow-key roving-tabindex grid keyboard nav (ARIA roles + resize/sort focus are in; cell-to-cell nav is the remaining WCAG item).
 - Lower-value view polish: **Group by item**, **column reorder**, **persisted table state**, structured list **Filters**, **Print/report**.
