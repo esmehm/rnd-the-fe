@@ -109,9 +109,33 @@ store CHC Ermera (`5B28901C52396E4BB098B9862CCF5DF9`).
   network emulation, heap snapshots). Ranking metric = **time-to-network-quiet** (scoped to the
   `stocktakeLines` query so background polling doesn't skew it).
 
+## Feature parity build-out (after the bake-off)
+
+To make Thin React a fair like-for-like with the old FE, added: an **app shell** (nav + footer),
+the **stocktakes list view** (paginated, New/delete, filter, row→detail), **detail parity**
+(Manufacturer column, editable description, Add-item search, On-hold + Confirm-finalised status
+workflow), a **multi-batch edit modal** (Batch/Pricing/Other tabs, Add batch, OK & next), a
+**More panel + Log tab** (activity log), **table power features** (column show/hide, resize,
+freeze/pin, fullscreen, ARIA grid roles), a **responsive card view** (virtualised, 48px touch
+targets, <900px), and **i18next** (English bundle; key strings converted).
+
+**Re-measured to guard the win** (6× CPU, prod, 1,506 lines, commit `14b9020`):
+
+| Metric | Thin React (initial) | Thin React (feature-complete) | Old FE |
+|---|---|---|---|
+| Time to data rendered | 911 ms | **905 ms** | 3,781 ms |
+| FCP | 116 ms | **136 ms** | 924 ms |
+| Code (JS+CSS, gzip) | 243 KB | **260 KB** | 1,362 KB |
+| DOM nodes | 496 | **860** | 1,363 |
+
+All the parity features cost **+17 KB gzip** and kept data-render flat (~905 ms). DOM rose to 860
+(per-cell freeze/ARIA wrappers) — still below the old FE. **The ~4× / ~5× win survived the build-out.**
+
 ## Next steps
 
 1. **INP** probe (event-timing + scripted cell-edit/scroll) on both apps — completes the M10 picture.
-2. **Solid arm** (same TanStack Table/Virtual, Kobalte, vanilla-extract) — does dropping the VDOM buy
+2. Finish the deep items: **full arrow-key grid keyboard nav** (React Aria useGrid), **full i18n
+   extraction** + RTL (CSS logical properties).
+3. **Solid arm** (same TanStack Table/Virtual, Kobalte, vanilla-extract) — does dropping the VDOM buy
    more on top of the 4×?
-3. Optional **Slow 4G** network throttle to model remote-site cold loads.
+4. Optional **Slow 4G** network throttle to model remote-site cold loads.

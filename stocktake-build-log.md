@@ -192,9 +192,40 @@ but even discounting it, render/paint/bundle/DOM/heap all favour Thin React by 2
 
 Recorded in `docs/perf/frontend-runs.html` (rows: Thin React dev, Thin React prod, Old FE prod).
 
-## Still to measure
+## Feature parity build-out + re-measure (commit `14b9020`)
+
+Added to close the gap with the old FE: **app shell** (nav + footer), **stocktakes list view**
+(paginated, new/delete, filter, row→detail), **detail parity** (Manufacturer column, editable
+description, Add-item search, On-hold/Confirm-finalised status workflow), **multi-batch edit modal**
+(Batch/Pricing/Other tabs, Add batch, OK & next), **More panel + Log tab**, **table power features**
+(column show/hide, resize, freeze/pin, fullscreen, ARIA grid roles), and a **responsive card view**
+(virtualised, 48px touch targets, <900px).
+
+Re-measured the detail screen (6× CPU, prod, 1,506 lines) to guard the win:
+
+| Metric | Thin React (initial) | **Thin React (feature-complete)** | Old FE |
+|---|---|---|---|
+| Time to data rendered | 911 ms | **905 ms** | 3,781 ms |
+| FCP | 116 ms | **136 ms** | 924 ms |
+| Code (JS+CSS, gzip) | 243 KB | **260 KB** | 1,362 KB |
+| DOM nodes | 496 | **860** | 1,363 |
+| JS heap | 36 MB | **39 MB** | 97 MB |
+
+**The ~4× win holds.** All the parity features cost **+17 KB gzip** and left data-render time flat.
+DOM rose 496→860 — the per-cell `gridcell`/pin wrappers (frozen columns + ARIA grid) add ~1 div per
+visible cell — still **well under the old FE's 1,363**. (Optimisation available: wrap only pinned cells.)
+
+### Gotchas from the build-out
+
+- **`contain: strict` breaks TanStack Virtual measurement.** `strict` includes `size` containment,
+  which reports the scroll element's height as 0 → the virtualizer renders an empty range (no rows/cards).
+  Use `contain: layout paint` (no `size`). Hit this on the card-list scroll container.
+- **Freeze via sticky needs opaque cell backgrounds** driven by a `--row-bg` var so pinned cells cover
+  scrolled content and match selected/hover state.
+
+## Still to do
 
 - **INP** on cell-edit + scroll (interaction latency) — the other half of the M10 story, both apps.
-- **Solid arm** (same TanStack Table/Virtual, Kobalte, vanilla-extract) — to test whether dropping the
-  VDOM buys more on top of Thin React's already-4× win.
-- Optional: **network throttle** (Slow 4G) to model remote-site loads (would widen the transfer gap).
+- **Full i18n** string extraction (i18next pattern established for key strings) + RTL via CSS logical props.
+- Full arrow-key roving-tabindex grid keyboard nav (ARIA roles + resize/sort focus are in; cell-to-cell nav is the remaining WCAG item).
+- **Solid arm** (same TanStack Table/Virtual, Kobalte, vanilla-extract) — does dropping the VDOM buy more?
