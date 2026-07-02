@@ -92,10 +92,11 @@ AI-familiarity, and still have headroom if we ever decide the renderer swap is w
 
 ## Strand B — Testing: proving parity without doubling QA
 
-**Full write-ups (in `tmf-testing`, branch `behaviour-anchored-testing-strategy` / PR #10):**
+**Full write-ups (in `tmf-testing`, branch `behaviour-anchored-testing-strategy` / PR #10 — ⚠ not on `main` yet, check that branch out):**
 [FRONTEND_REWRITE_PARITY.md](https://github.com/msupply-foundation/tmf-testing/blob/behaviour-anchored-testing-strategy/FRONTEND_REWRITE_PARITY.md)
 (the rewrite-specific strategy) · [AUTOMATED_TESTING_STRATEGY.md](https://github.com/msupply-foundation/tmf-testing/blob/behaviour-anchored-testing-strategy/AUTOMATED_TESTING_STRATEGY.md)
-(the standing model).
+(the standing model) · exploratory findings for this build:
+[stocktake-findings-fe-rewrite-11bc72d.md](https://github.com/msupply-foundation/tmf-testing/blob/behaviour-anchored-testing-strategy/projects/oms/core/exploratory/runs/stocktake-findings-fe-rewrite-11bc72d.md).
 
 ### The core idea: one single source of truth, two test engines, one oracle
 

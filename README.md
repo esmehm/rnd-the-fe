@@ -52,9 +52,12 @@ Behaviour IDs are a single source of truth; a **deterministic** Playwright suite
 agent** both anchor to them; the old app is the oracle, so the rewrite becomes **differential testing**
 scored on a per-behaviour parity matrix. Pointed at this build, the exploratory agent already found a
 **HIGH data-integrity bug** (Add-item double-count, root-caused to the FE) + 4 more in ~26 min. See
-[RND-DAY.md](RND-DAY.md) (Strand B) and the strategy docs in `tmf-testing`
-(`behaviour-anchored-testing-strategy` branch): `FRONTEND_REWRITE_PARITY.md`,
-`AUTOMATED_TESTING_STRATEGY.md`, and `projects/oms/core/exploratory/runs/`.
+[RND-DAY.md](RND-DAY.md) (Strand B) for the full picture.
+
+> **Where Strand B lives:** the `tmf-testing` repo, on the **`behaviour-anchored-testing-strategy` branch
+> (PR #10) — not `main` yet**, so check that branch out. Key files (all top level unless noted):
+> `FRONTEND_REWRITE_PARITY.md`, `AUTOMATED_TESTING_STRATEGY.md`, and the exploratory findings for this
+> build at `projects/oms/core/exploratory/runs/stocktake-findings-fe-rewrite-11bc72d.md`.
 
 ---
 
