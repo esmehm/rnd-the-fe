@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>R&D Day — FE Rewrite</title>
+<style>
+  :root{
+    --bg:#f7f8fa; --surface:#ffffff; --ink:#1c2433; --muted:#6b7686;
+    --line:#e0e4ea; --orange:#e95c2b; --orange-d:#c0451f; --blue:#2f6fed;
+    --green:#1b7f3b; --red:#c0392b; --amber:#b45309;
+    --font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:#0e1118;color:var(--ink);font-family:var(--font)}
+  /* stage */
+  #stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+  .slide{
+    position:absolute;width:min(96vw,1180px);aspect-ratio:16/9;max-height:94vh;
+    background:var(--bg);border-radius:14px;box-shadow:0 24px 80px rgba(0,0,0,.5);
+    padding:56px 64px;display:none;flex-direction:column;overflow:hidden;
+  }
+  .slide.active{display:flex;animation:in .25s ease}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .slide::before{content:"";position:absolute;left:0;top:0;bottom:0;width:10px;background:var(--orange)}
+  .kicker{color:var(--orange);font-weight:700;font-size:15px;letter-spacing:.08em;text-transform:uppercase;margin:0 0 10px}
+  h1{font-size:52px;line-height:1.05;margin:0 0 14px;font-weight:800;letter-spacing:-.02em}
+  h2{font-size:38px;line-height:1.08;margin:0 0 20px;font-weight:800;letter-spacing:-.01em}
+  .sub{font-size:23px;color:var(--muted);font-weight:500;margin:0}
+  p{font-size:22px;line-height:1.45;margin:0 0 14px}
+  ul{margin:6px 0 0;padding:0;list-style:none}
+  li{font-size:22px;line-height:1.4;margin:0 0 14px;padding-left:30px;position:relative}
+  li::before{content:"";position:absolute;left:2px;top:12px;width:10px;height:10px;border-radius:3px;background:var(--orange)}
+  li.plain::before{background:var(--muted)}
+  strong{font-weight:700}
+  .big{font-size:30px}
+  .muted{color:var(--muted)}
+  .win{color:var(--orange);font-weight:800}
+  .center{align-items:center;justify-content:center;text-align:center}
+  .grow{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0}
+  .cap{font-size:19px;color:var(--muted);margin-top:18px}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:34px}
+  .cols3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:26px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px 22px}
+  .card h3{margin:0 0 10px;font-size:20px}
+  .card li{font-size:18px;margin-bottom:9px}
+  .card li::before{top:9px;width:8px;height:8px}
+  table{border-collapse:collapse;width:100%;font-size:21px}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:700;font-size:16px;text-transform:uppercase;letter-spacing:.04em}
+  td.num{text-align:right;font-variant-numeric:tabular-nums}
+  tr td:last-child{font-weight:800;color:var(--orange)}
+  .matrix td,.matrix th{text-align:center;font-size:20px}
+  .matrix td{font-weight:600}
+  .g{color:var(--green)} .r{color:var(--red)} .a{color:var(--amber)} .b{color:var(--blue)}
+  pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:17px;line-height:1.5;
+      background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;margin:0;color:var(--ink);overflow:auto}
+  .tag{display:inline-block;font-size:14px;font-weight:700;padding:3px 10px;border-radius:999px;background:#fdece7;color:var(--orange-d);margin-left:8px;vertical-align:middle}
+  .foot{position:absolute;left:64px;bottom:22px;font-size:14px;color:var(--muted)}
+  .num-badge{position:absolute;right:26px;bottom:20px;font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .logo{width:42px;height:42px;border-radius:10px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:20px}
+  #bar{position:fixed;top:0;left:0;height:4px;background:var(--orange);width:0;transition:width .2s;z-index:10}
+  .hint{position:fixed;right:14px;top:12px;font-size:12px;color:#6b7686;z-index:10;opacity:.7}
+  .two-line{font-size:19px}
+  .kv{display:flex;gap:14px;font-size:21px;margin-bottom:12px;align-items:baseline}
+  .kv b{min-width:210px;display:inline-block}
+  @media print{
+    html,body{background:#fff}
+    #bar,.hint{display:none}
+    #stage{position:static;display:block}
+    .slide{display:flex!important;position:relative;width:100%;max-height:none;aspect-ratio:auto;min-height:96vh;
+           box-shadow:none;border:1px solid var(--line);border-radius:0;page-break-after:always;margin:0}
+  }
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="hint">← → to navigate · F fullscreen · P then browser-print for PDF</div>
+<div id="stage">
+
+  <!-- 1 TITLE -->
+  <section class="slide center">
+    <div class="logo" style="margin-bottom:20px">mS</div>
+    <p class="kicker">R&amp;D Day · open mSupply front end</p>
+    <h1>Rewrite the front end?</h1>
+    <p class="sub">Can we — and can we <em>prove</em> it?</p>
+    <p class="cap">Thin React perf bake-off &nbsp;·&nbsp; behaviour-anchored parity testing</p>
+  </section>
+
+  <!-- 2 PROBLEM -->
+  <section class="slide">
+    <p class="kicker">The problem</p>
+    <h2>A rewrite is on the table — for good reason</h2>
+    <div class="grow">
+      <p>Old low-spec tablets (<strong>Lenovo M10</strong>) in end-client hands are near-unusable. A full front-end rewrite has been proposed.</p>
+      <p><strong>Two ways a rewrite goes wrong</strong> — the two things worth de-risking <em>before</em> anyone commits:</p>
+      <ul>
+        <li>It turns out <strong>not actually faster</strong> — or you can't say <em>what</em> made it faster.</li>
+        <li>You <strong>can't prove</strong> the new app still does what the old one did.</li>
+      </ul>
+      <p style="margin-top:18px" class="big">→ Two strands: <span class="win">measure the win</span> &nbsp;+&nbsp; <span class="win">prove parity</span>.</p>
+    </div>
+  </section>
+
+  <!-- 3 STRAND A QUESTION -->
+  <section class="slide">
+    <p class="kicker">Strand A · Performance</p>
+    <h2>Can we win <em>without leaving React&nbsp;+&nbsp;TypeScript?</em></h2>
+    <div class="grow">
+      <p>A pure-JS prototype already showed the performance <strong>ceiling is high</strong> — but it got there by dropping React <em>and</em> type-safety.</p>
+      <p>So the useful question isn't "can it be faster" — it's:</p>
+      <ul>
+        <li>Can we capture <strong>most of that win while keeping React + TS?</strong> — dev + AI familiarity, JSONForms binding, plugins, lower risk.</li>
+        <li>And <strong>where does the win come from?</strong></li>
+      </ul>
+      <p style="margin-top:16px"><strong>"Drop React?"</strong> becomes a <em>separate, later, evidence-based</em> decision — not the premise of the rewrite.</p>
+    </div>
+  </section>
+
+  <!-- 4 SETUP -->
+  <section class="slide">
+    <p class="kicker">Strand A · The control-arm setup</p>
+    <h2>Keep React. Rip out everything that's slow.</h2>
+    <div class="grow cols">
+      <div class="card">
+        <h3>Remove</h3>
+        <ul>
+          <li><strong>MUI</strong> + <strong>emotion</strong> (runtime CSS-in-JS)</li>
+          <li><strong>Material React Table</strong></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Replace with</h3>
+        <ul>
+          <li><strong>React Aria</strong> — headless a11y</li>
+          <li><strong>vanilla-extract</strong> — zero-runtime CSS</li>
+          <li><strong>TanStack Table + Virtual</strong></li>
+          <li class="plain">React 19 + Compiler · Rspack · kept TS</li>
+        </ul>
+      </div>
+    </div>
+    <p class="cap">Greenfield <strong>stocktake</strong> screen, real backend — measured against the current app at <strong>6× CPU</strong> (M10 proxy), prod builds.</p>
+  </section>
+
+  <!-- 5 HEADLINE -->
+  <section class="slide">
+    <p class="kicker">Strand A · The headline</p>
+    <h2>Same screen. 6× CPU. 1,506-line stocktake.</h2>
+    <div class="grow">
+      <table>
+        <thead><tr><th>Metric</th><th>Old FE (MUI+MRT+emotion)</th><th>Thin React</th><th>Win</th></tr></thead>
+        <tbody>
+          <tr><td>Time to data rendered</td><td class="num">3,781 ms</td><td class="num">911 ms</td><td>~4.1×</td></tr>
+          <tr><td>First Contentful Paint</td><td class="num">924 ms</td><td class="num">116 ms</td><td>~8×</td></tr>
+          <tr><td>Code transfer (JS+CSS, gzip)</td><td class="num">1,362 KB</td><td class="num">243 KB</td><td>~5.6×</td></tr>
+          <tr><td>DOM nodes</td><td class="num">1,363</td><td class="num">496</td><td>~2.7×</td></tr>
+          <tr><td>JS heap</td><td class="num">97 MB</td><td class="num">36 MB</td><td>~2.7×</td></tr>
+        </tbody>
+      </table>
+      <p class="cap"><strong>~4× faster to usable, ~5.6× smaller</strong> — and the win held through the feature build-out + a visual-parity pass. <span class="muted">The VDOM is still in place.</span></p>
+    </div>
+  </section>
+
+  <!-- 6 INP -->
+  <section class="slide">
+    <p class="kicker">Strand A · Interaction latency (INP, 6× CPU)</p>
+    <h2>The interactions users feel</h2>
+    <div class="grow">
+      <table>
+        <thead><tr><th>Interaction</th><th>Old FE</th><th>Thin React</th><th>Win</th></tr></thead>
+        <tbody>
+          <tr><td>Open edit modal</td><td class="num">1,144 ms</td><td class="num">104 ms</td><td>~11×</td></tr>
+          <tr><td>Row select</td><td class="num">~304 ms</td><td class="num">48–56 ms</td><td>~6×</td></tr>
+          <tr><td>Cell edit</td><td class="num">— *</td><td class="num">40–88 ms</td><td>—</td></tr>
+        </tbody>
+      </table>
+      <p class="cap">* Old FE has <strong>no inline edit</strong> — every count is a ~1.1 s modal round-trip. Thin React edits in-cell. <strong>Never worse; 6–11× better on the heavy ones.</strong></p>
+    </div>
+  </section>
+
+  <!-- 7 REFRAME -->
+  <section class="slide center">
+    <p class="kicker">Strand A · The reframe</p>
+    <h2>It was the libraries — not React's renderer.</h2>
+    <div class="grow center" style="max-width:900px">
+      <p class="big">The ~4× / ~5.6× win holds <strong>with the VDOM still in place.</strong></p>
+      <p>So we take the <span class="win">low-risk win now</span> — keep React + TS, dev + AI familiarity, the JSONForms/plugin ecosystem.</p>
+      <p class="big" style="margin-top:10px">The React → Solid/Svelte swap drops from <span class="muted">mandatory</span> to an <strong>optional, later bet</strong> — with headroom still on the table.</p>
+    </div>
+  </section>
+
+  <!-- 8 STRAND B -->
+  <section class="slide">
+    <p class="kicker">Strand B · Testing</p>
+    <h2>Prove parity without doubling QA</h2>
+    <div class="grow">
+      <ul>
+        <li><strong>Behaviour IDs = single source of truth.</strong> Every rule QA checked by hand is now an atomic, ID'd behaviour (<code>OMS-REG-INV-03.9</code>). ~112 case files migrated + a CI guard.</li>
+        <li><strong>Two engines, same anchor:</strong> a <strong>deterministic</strong> Playwright suite (<code>covers</code>-tagged) and an <strong>exploratory AI agent</strong> — both anchor to the same IDs; neither redefines them.</li>
+        <li><strong>The old app is the oracle.</strong> Both FEs run on one unchanged backend → the rewrite becomes <strong>differential testing</strong>.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 9 MATRIX -->
+  <section class="slide">
+    <p class="kicker">Strand B · The money slide</p>
+    <h2>The parity matrix</h2>
+    <div class="grow">
+      <p class="sub" style="margin-bottom:16px">Same spec, <code>BASE_URL</code>-swapped. One cell per behaviour:</p>
+      <table class="matrix">
+        <thead><tr><th></th><th>passes on OLD</th><th>fails on OLD</th></tr></thead>
+        <tbody>
+          <tr><th>passes on NEW</th><td class="g">✅ replicated</td><td class="a">⚠️ old bug fixed — confirm intended</td></tr>
+          <tr><th>fails on NEW</th><td class="r">🔴 regression the rewrite introduced</td><td class="muted">known-broken — not a blocker</td></tr>
+        </tbody>
+      </table>
+      <p class="cap">The <span class="r">🔴 cell</span> <em>is</em> the blocker list. "Done" stops being "feels close" → <strong>every active behaviour green on new, at visual parity, within perf budget.</strong></p>
+    </div>
+  </section>
+
+  <!-- 10 PORTABILITY -->
+  <section class="slide">
+    <p class="kicker">Strand B · Do the tests survive a rewrite?</p>
+    <h2>Portability is a property of the DOM, not the framework</h2>
+    <div class="grow">
+      <p>Measured on the distribution workflow:</p>
+      <ul>
+        <li><strong>~98% semantic locators</strong> — <code>getByRole</code> (90), <code>getByTestId</code> (55), <code>getByText</code> (27).</li>
+        <li>vs <strong>3 brittle</strong> (CSS-hash / nth-child).</li>
+      </ul>
+      <p style="margin-top:14px">Any FE that emits a <strong>queryable, accessible DOM + preserved <code>data-testid</code>s</strong> keeps the suite. <span class="muted">(Failure mode: a <code>&lt;canvas&gt;</code>/WebGL grid → no DOM → every locator dies at once.)</span></p>
+      <p class="cap"><strong>So a stack bake-off doubles as a portability check</strong> — this is the bridge to Strand A.</p>
+    </div>
+  </section>
+
+  <!-- 11 PROOF IT BITES -->
+  <section class="slide">
+    <p class="kicker">Strand B · Proof it bites <span class="tag">real catch</span></p>
+    <h2>The exploratory agent found a real bug in the rewrite</h2>
+    <div class="grow">
+      <p>Pointed at the new FE, it walked the full stocktake workflow (~24 behaviours) in <strong>~26 min</strong> and found <strong>5 issues</strong>, including:</p>
+      <ul>
+        <li><strong class="r">HIGH — Add-item double-count</strong> (data integrity): finalising an added item that already has stock posts a <em>new</em> stock line on top → 500 in stock, counted 450, finalised as <strong>950</strong>. <strong>DB-verified.</strong> Root-caused to the <strong>FE</strong>.</li>
+        <li class="plain">+ a validation/error-leak (MEDIUM-HIGH) and 3 LOWs; each anchored to a behaviour ID.</li>
+      </ul>
+      <p class="cap">The kind of bug perf metrics, type-checks and load tests never see — <strong>caught in ~26 min.</strong> The strand catches <em>real new bugs</em>, not just replays known ones.</p>
+    </div>
+  </section>
+
+  <!-- 12 JOIN -->
+  <section class="slide">
+    <p class="kicker">How the strands join</p>
+    <h2>Measure the win · prove parity · same proof page</h2>
+    <div class="grow">
+      <pre>  Behaviour IDs (tmf-testing) ── single source of truth ──┐
+        ├─ deterministic tests (Playwright, covers-tagged) ─┤
+        └─ exploratory agent (same IDs) ────────────────────┤
+                                                             ▼
+                    run against ─►  OLD FE ─┐
+                    (BASE_URL)              ├─► PARITY MATRIX ─► rewrite done-state
+                                 NEW FE ────┘     (per behaviour)
+                               (Thin React)</pre>
+      <ul style="margin-top:18px">
+        <li><strong>Strand A</strong> → the rewrite is <strong>worth doing</strong> (and keeping React is fine).</li>
+        <li><strong>Strand B</strong> → any rewrite is <strong>done</strong> — and its portability check is <em>how you'd pick the stack</em>.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 13 STATUS -->
+  <section class="slide">
+    <p class="kicker">Status at a glance</p>
+    <h2>Where it stands</h2>
+    <div class="grow cols3">
+      <div class="card">
+        <h3 style="color:var(--green)">Done ✅</h3>
+        <ul>
+          <li>Bake-off: ~4× faster, ~5.6× smaller, INP 6–11× — React + TS kept</li>
+          <li>Behaviour-ID source of truth + CI guard</li>
+          <li>Exploratory agent found a HIGH bug in the rewrite</li>
+          <li>Visual-parity pass shipped</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--amber)">In progress 🟡</h3>
+        <ul>
+          <li>Deterministic parity suite running vs the new FE → matrix incoming</li>
+          <li>Stocktake suite (21 tests) wired to behaviour IDs</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 class="muted">Next ⬜</h3>
+        <ul>
+          <li>Fix the exploratory findings</li>
+          <li>CI perf-budget gate</li>
+          <li>Solid arm (optional, evidence-driven)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14 ASKS -->
+  <section class="slide">
+    <p class="kicker">What I need from the room</p>
+    <h2>Open decisions</h2>
+    <div class="grow">
+      <ul>
+        <li><strong>Target hardware in CI?</strong> — run the perf-budget gate on an M10-class profile, or a throttled proxy?</li>
+        <li><strong>Public vs private tests?</strong> — where do the behaviour-anchored suites live.</li>
+        <li><strong>Build the Solid arm?</strong> — does dropping the VDOM buy enough on top of ~4× to be worth it?</li>
+        <li><strong>Visual-diff tolerance</strong> for the parity matrix.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 15 CLOSE -->
+  <section class="slide center">
+    <p class="kicker">Takeaway</p>
+    <h2>A rewrite is justified when you can<br/>measure the win <span class="muted">and</span> prove parity.</h2>
+    <div class="grow center" style="max-width:960px">
+      <p class="big">We can <span class="win">drastically improve performance without leaving React + TypeScript</span> — and prove the new app matches the old with tests that don't care which front end they're pointed at.</p>
+      <p class="cap"><strong>Live demo:</strong> old FE vs Thin React, open the edit modal — <strong>1.1 s vs 0.1 s.</strong><br/>Fallback: recorded walkthrough at <code>docs/perf/exploratory-stocktake-walkthrough.webm</code>.</p>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  const bar = document.getElementById('bar');
+  let i = Math.max(0, Math.min(slides.length-1, (parseInt(location.hash.slice(1))||1)-1));
+  function show(n){
+    i = Math.max(0, Math.min(slides.length-1, n));
+    slides.forEach((s,idx)=>s.classList.toggle('active', idx===i));
+    bar.style.width = ((i+1)/slides.length*100)+'%';
+    let badge = slides[i].querySelector('.num-badge');
+    if(!badge){ badge=document.createElement('div'); badge.className='num-badge'; slides[i].appendChild(badge); }
+    badge.textContent = (i+1)+' / '+slides.length;
+    history.replaceState(null,'','#'+(i+1));
+  }
+  function next(){show(i+1)} function prev(){show(i-1)}
+  document.addEventListener('keydown',e=>{
+    if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();next()}
+    else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();prev()}
+    else if(e.key==='Home'){show(0)} else if(e.key==='End'){show(slides.length-1)}
+    else if(e.key==='f'||e.key==='F'){ if(!document.fullscreenElement)document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
+  });
+  document.getElementById('stage').addEventListener('click',e=>{ if(e.clientX < innerWidth*0.28) prev(); else next(); });
+  show(i);
+</script>
+</body>
+</html>
