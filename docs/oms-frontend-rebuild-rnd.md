@@ -240,7 +240,7 @@ CSV export, and the full/filtered/blank New-stocktake modal.
 
 - Full write-up + coverage scorecard: [stocktake-bakeoff-summary.md](stocktake-bakeoff-summary.md)
 - Chronological build log + gotchas: [stocktake-build-log.md](stocktake-build-log.md)
-- Raw measured rows: [docs/perf/frontend-runs.html](docs/perf/frontend-runs.html)
+- Raw measured rows: [perf/frontend-runs.html](perf/frontend-runs.html)
 
 **Gaps vs this brief still open:** (1) **CI perf-budget gate** (§7's "stops perf regressing" pattern); (2) the
 **Solid arm** (§8's evidence-driven optional third implementation). **INP is now measured** — full old-FE

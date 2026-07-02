@@ -4,7 +4,7 @@ _RnD day: greenfield "Thin React" rebuild of the OMS stocktake screen, measured 
 against the current MUI/MRT app on a simulated Lenovo M10. Companion docs:
 [oms-frontend-rebuild-rnd.md](oms-frontend-rebuild-rnd.md) (decision rationale) ·
 [stocktake-build-log.md](stocktake-build-log.md) (chronological build log + gotchas) ·
-[docs/perf/frontend-runs.html](docs/perf/frontend-runs.html) (raw results table)._
+[perf/frontend-runs.html](perf/frontend-runs.html) (raw results table)._
 
 ---
 

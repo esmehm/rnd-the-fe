@@ -28,6 +28,8 @@ Then ask Claude: **"run a perf test on the stocktake scenario"** (optionally `--
   `COLLECT_SRC` (read metrics after ready). Bump `COLLECTOR_VERSION` if you change the shape.
 - `append-row.mjs` — owns the HTML format; `COLUMNS` is the single source of truth; inserts
   before the `<!--ROWS-->` marker and refuses to write if it's missing.
+- `machine.mjs` — prints the machine descriptor (`chip (Nc, NGB) macOS x`) for the `machine`
+  field, so rows are comparable across teammates. The chip name isn't visible from the browser.
 - `scenarios.json` — pages to measure (`path`, `readySignal`, `dataItemCountSelector`).
 
 ## Add a scenario

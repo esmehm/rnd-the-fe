@@ -7,8 +7,9 @@ AI familiarity and lower rewrite risk, leaving any "drop React" call for a separ
 decision. (Mechanistically that means isolating how much of the slowness is React's VDOM vs the
 MUI/emotion/MRT libraries on top.) Keep this codebase **lean and consistent** — it's also a test of whether
 AI + humans can extend a golden-path stack reliably.
-Full context: [oms-frontend-rebuild-rnd.md](oms-frontend-rebuild-rnd.md) · running log:
-[stocktake-build-log.md](stocktake-build-log.md).
+Full context: [README.md](README.md) (the overview) · decision rationale:
+[docs/oms-frontend-rebuild-rnd.md](docs/oms-frontend-rebuild-rnd.md) · running log:
+[docs/stocktake-build-log.md](docs/stocktake-build-log.md).
 
 ## Stack (do not add alternatives without sign-off)
 

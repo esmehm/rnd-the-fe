@@ -51,8 +51,11 @@ set and results format are fixed (see `append-row.mjs` COLUMNS).
    can report "Target crashed" — detect, wait for recovery, and **retry that run** rather than
    recording a bad sample.
 6. **Aggregate**: median + min–max across the kept runs for the headline/network timings; format
-   as `"<median> (<min>–<max>)"`. Gather run context (git branch/commit via `git`, machine cores
-   /OS/Chrome UA, throttle, cold/warm, `dataItemCount` from the collector).
+   as `"<median> (<min>–<max>)"`. Gather run context: git branch/commit via `git`; the **machine
+   descriptor** via `node .claude/skills/perf-measure/machine.mjs` (emits `chip (Nc, NGB) macOS x` —
+   the browser can't see the chip name, so read it from the OS) then append the browser channel,
+   e.g. `… · Chromium(Playwright)`; throttle; cold/warm; `dataItemCount` from the collector. The
+   chip + RAM are what make rows comparable across teammates — never leave `machine` vague.
 7. **Append** one row: `node .claude/skills/perf-measure/append-row.mjs '<json>'`. Keys must
    match COLUMNS. The appender creates the doc on first run and refuses to write if the `<!--ROWS-->`
    marker is missing/duplicated.
