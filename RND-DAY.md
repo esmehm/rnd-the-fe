@@ -1,7 +1,7 @@
 # R&D Day — FE Rewrite: can we, and can we prove it?
 
-_One-page-ish map of everything in flight, and the backbone for the talk. Newest
-detail lives in the linked docs; this file is the joining story + status + slide flow._
+_One-page-ish map of everything in flight. Newest detail lives in the linked docs; this file is the
+joining story + status. The talk itself is the deck at [docs/rnd-day-slides.html](docs/rnd-day-slides.html)._
 
 ---
 
@@ -194,36 +194,6 @@ tagged tests against each prototype and see which pass unchanged. This is the br
 
 ---
 
-## Presentation flow (≈15 min)
-
-1. **The problem (1 slide).** Old tablets, near-unusable, rewrite proposed. Two ways a rewrite
-   fails: it's not actually faster, or you can't prove it still works. → my two strands.
-2. **Strand A — can we win *without leaving React/TS*? (2–3 slides).** The question (a pure-JS demo
-   already proved the ceiling — can we keep React + TS and still win?). The control-arm setup (keep
-   React, rip out MUI/emotion/MRT). **The headline table.** The INP head-to-head (11× on opening the
-   edit modal is the visceral one). *Answer: yes — and it's the libraries, not the renderer.*
-3. **Reframe (1 slide).** We hit the target **without leaving React/TypeScript** — the mandatory,
-   high-leverage work is framework-independent, so the React→Solid swap is now an optional, later bet,
-   not the premise. Keeps dev + AI familiarity and de-risks the whole proposal.
-4. **Strand B — proving parity (2–3 slides).** Behaviour IDs as one source of truth → both a
-   deterministic suite and an AI exploratory agent anchor to them. **The parity matrix** (old ×
-   new). The portability finding (~98% semantic → survives a rewrite if the DOM stays queryable).
-   *Proof it bites:* the exploratory agent, pointed at the rewrite, found a **HIGH data-integrity bug
-   (Add-item double-count) + 4 more in ~26 min**, DB-verified — the strand catches *real* new bugs, not
-   just replays known ones.
-5. **The join (1 slide).** The diagram above — measure the win, prove parity, and the bake-off
-   *is* the portability check. Stocktake is the shared proof page.
-6. **Status + asks (1 slide).** What's done / in-progress / next. Open decisions that need the
-   room: target-hardware in CI, public-vs-private tests, and whether to build the Solid arm.
-
-**Live demo option:** old FE vs Thin React side by side on the throttled profile — open the edit
-modal on each (1.1 s vs 0.1 s). Then show the `covers`-tagged spec + the results.json that feeds
-the matrix. "Same test, two apps, one table" beats any diagram. A **recorded walkthrough** of the
-new-FE stocktake workflow is at [docs/perf/exploratory-stocktake-walkthrough.webm](docs/perf/exploratory-stocktake-walkthrough.webm)
-as a fallback if live throttling is flaky on the day.
-
----
-
 ## Repo/branch cheat-sheet (for anyone following up)
 
 | What | Repo / branch |
@@ -234,6 +204,8 @@ as a fallback if live throttling is flaky on the day.
 | Deterministic distribution suite | `open-msupply` @ `distribution-regresstion-test` |
 | WIP stocktake deterministic suite | `open-msupply-uno` @ `distribution-regresstion-test` |
 | Perf-measure skill (throttle + INP runners) | `rnd-the-fe` `.claude/skills/perf-measure/` |
+| Talk deck (self-contained slides) | `rnd-the-fe` `docs/rnd-day-slides.html` |
+| Recorded new-FE stocktake walkthrough | `rnd-the-fe` `docs/perf/exploratory-stocktake-walkthrough.webm` |
 
 > _`open-msupply`, `open-msupply-duo` and `open-msupply-uno` are **separate working copies of the same
 > open-msupply repo** — kept side by side so different branches/FEs (old-FE prod build, distribution
